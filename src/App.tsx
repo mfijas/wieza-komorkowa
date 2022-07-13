@@ -49,6 +49,13 @@ function App() {
     const [solutionMatrix, setSolutionMatrix] = useState<string[][]>([])
 
     useEffect(() => {
+        if (tileState !== undefined) {
+            storeTileStateInLocalStorage(tileState)
+        }
+    }, [tileState])
+
+    useEffect(() => {
+        // this below is crap. rewrite it
         if (puzzleInLocalStorage()) {
             const [resolvedMatrix, solutionMatrix] = readPuzzleFromLocalStorage()
             setResolvedMatrix(resolvedMatrix)
@@ -57,11 +64,13 @@ function App() {
             setTileState(storedTileState)
             setAvailableWordNumbers(getUnusedWordNumbers(storedTileState))
         } else {
-            const [resolvedMatrix, solutionMatrix] = generatePuzzle(WIDTH, HEIGHT)
-            storePuzzleInLocalStorage([resolvedMatrix, solutionMatrix])
-            setResolvedMatrix(resolvedMatrix)
-            setSolutionMatrix(solutionMatrix)
-            setTileState(emptyTileState())
+            const {matrix, solution} = generatePuzzle(WIDTH, HEIGHT)
+            storePuzzleInLocalStorage([matrix, solution])
+            setResolvedMatrix(matrix)
+            setSolutionMatrix(solution)
+            let newTileState = emptyTileState()
+            setTileState(newTileState)
+            storeTileStateInLocalStorage(newTileState)
             setAvailableWordNumbers(getAllWordNumbers())
         }
     }, [])
