@@ -1,26 +1,135 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {useEffect, useState} from 'react'
+import './App.scss'
+import _ from 'lodash'
+import {set} from './funtools'
+import {Grid} from './Grid'
+import {Status} from './Status'
+import {generatePuzzle} from './GeneratePuzzle'
+import {
+    puzzleInLocalStorage,
+    readPuzzleFromLocalStorage,
+    readTileStateFromLocalStorage,
+    storePuzzleInLocalStorage,
+    storeTileStateInLocalStorage
+} from './LocalStorage'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const WIDTH = 7
+const HEIGHT = 12
+
+const NUMBER_OF_WORD_COLOURS = 21
+
+// type Tile = 'selected' | 'empty' | number
+
+function emptyTileState() {
+    return _.chunk(Array<string>(WIDTH * HEIGHT).fill('0'), WIDTH);
 }
 
-export default App;
+function getAllWordNumbers() {
+    return [...Array(NUMBER_OF_WORD_COLOURS).keys()].slice(1);
+}
+
+function getUnusedWordNumbers(tileState: string[][]) {
+    return _.difference(
+        getAllWordNumbers(),
+        _.uniq(tileState.flatMap(row =>
+                row
+                    .filter(tile => tile !== 'selected' && parseInt(tile) > 0)
+                    .map(tile => parseInt(tile))
+            )
+        )
+    )
+}
+
+function App() {
+    const [tileState, setTileState] = useState<string[][]>()
+
+    const [availableWordNumbers, setAvailableWordNumbers] = useState<number[]>([])
+
+    const [resolvedMatrix, setResolvedMatrix] = useState<string[][]>([])
+    const [solutionMatrix, setSolutionMatrix] = useState<string[][]>([])
+
+    useEffect(() => {
+        if (puzzleInLocalStorage()) {
+            const [resolvedMatrix, solutionMatrix] = readPuzzleFromLocalStorage()
+            setResolvedMatrix(resolvedMatrix)
+            setSolutionMatrix(solutionMatrix)
+            const storedTileState = readTileStateFromLocalStorage()
+            setTileState(storedTileState)
+            setAvailableWordNumbers(getUnusedWordNumbers(storedTileState))
+        } else {
+            const [resolvedMatrix, solutionMatrix] = generatePuzzle(WIDTH, HEIGHT)
+            storePuzzleInLocalStorage([resolvedMatrix, solutionMatrix])
+            setResolvedMatrix(resolvedMatrix)
+            setSolutionMatrix(solutionMatrix)
+            setTileState(emptyTileState())
+            setAvailableWordNumbers(getAllWordNumbers())
+        }
+    }, [])
+
+    useEffect(() => {
+        if (tileState) {
+            storeTileStateInLocalStorage(tileState)
+        }
+    }, [tileState])
+
+    function popNextWordNumber() {
+        if (availableWordNumbers.length === 0) {
+            throw Error('Ran out of word numbers!')
+        }
+        setAvailableWordNumbers(_.tail(availableWordNumbers))
+        return _.head(availableWordNumbers)!
+    }
+
+    function pushNextWordNumber(nextWordNumber: number) {
+        setAvailableWordNumbers([nextWordNumber, ...availableWordNumbers])
+    }
+
+    function markWord() {
+        const nextMarkedWordNumber = popNextWordNumber()
+        const newTileState = tileState!.map(row =>
+            row.map(tile =>
+                tile === 'selected' ? nextMarkedWordNumber.toString(32) : tile))
+        setTileState(newTileState)
+    }
+
+    function removeWord(wordNumber: number) {
+        const newTileState = tileState!.map(row =>
+            row.map(tile =>
+                tile === wordNumber.toString(32) ? '0' : tile))
+        setTileState(newTileState)
+        pushNextWordNumber(wordNumber)
+    }
+
+    if (tileState) {
+        return (
+            <div id='app'>
+                <Grid
+                    matrix={resolvedMatrix}
+                    tileState={tileState}
+                    updateTileState={(x: number, y: number, newState: string) =>
+                        setTileState(tileState => set(tileState!, y, x, newState))}
+                    removeWord={removeWord}
+                />
+                <Status
+                    matrix={resolvedMatrix}
+                    tileState={tileState}
+                    markWord={markWord}
+                />
+                <table>
+                    <tbody>
+                    {resolvedMatrix.map((row, y) =>
+                        <tr key={'r_' + y}>
+                            {row.map((cell, x) =>
+                                <td key={'c_' + y + '_' + x} className={'t' + solutionMatrix[y][x]}>{cell}</td>
+                            )}
+                        </tr>)}
+                    </tbody>
+                </table>
+            </div>
+        )
+    } else {
+        return <></>
+    }
+}
+
+export default App

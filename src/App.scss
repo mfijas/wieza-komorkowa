@@ -1,0 +1,112 @@
+$fontSize: 20px;
+
+$cols: 7;
+$rows: 12;
+
+$colors: ('0', #a9a9a9, black),
+        ('selected', #e6194B, white),
+        ('1', #3cb44b, white),
+        ('2', #ffe119, black),
+        ('3', #4363d8, white),
+        ('4', #f58231, white),
+        ('5', #911eb4, white),
+        ('6', #42d4f4, black),
+        ('7', #f032e6, white),
+        ('8', #bfef45, black),
+        ('9', #fabed4, black),
+        ('a', #469990, white),
+        ('b', #dcbeff, black),
+        ('c', #9A6324, white),
+        ('d', #fffac8, black),
+        ('e', #d20f0f, white),
+        ('f', #aaffc3, black),
+        ('g', #808000, white),
+        ('h', #ffd8b1, black),
+        ('i', #000075, white),
+        ('10', #469990, white),
+        ('11', #dcbeff, black),
+        ('12', #9A6324, white),
+        ('13', #fffac8, black),
+        ('14', #d20f0f, white),
+        ('15', #aaffc3, black),
+        ('16', #808000, white),
+        ('17', #ffd8b1, black),
+        ('18', #000075, white);
+
+@each $color in $colors {
+  .t#{nth($color, 1)} {
+    background-color: nth($color, 2);
+    color: nth($color, 3);
+  }
+
+  .t#{nth($color, 1)} rect {
+    fill: nth($color, 2);
+  }
+
+  .t#{nth($color, 1)} text {
+    fill: nth($color, 3);
+  }
+}
+
+body {
+  font-size: $fontSize;
+}
+
+button {
+  font-size: $fontSize;
+}
+
+#app {
+  margin: auto;
+  width: ($cols*2)*1em;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat($cols, 1fr);
+}
+
+#grid button {
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.letter {
+  font-size: 50pt;
+  dominant-baseline: central;
+  text-anchor: middle;
+}
+
+.grey {
+  background-color: #a9a9a9;
+  /*color: white;*/
+}
+
+.status {
+  width: ($cols*2)*1em;
+}
+
+.status button {
+  width: 100%;
+  height: 2em;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.status rect {
+  fill: #4363d8;
+}
+
+.status text {
+  fill: white;
+  font-size: 0.35em;
+  dominant-baseline: central;
+  text-anchor: middle;
+}
+
+
+
