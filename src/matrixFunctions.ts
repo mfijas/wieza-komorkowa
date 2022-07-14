@@ -1,8 +1,4 @@
-export function extractSelectedWord(matrix: string[][], tileStates: string[][]) {
-    return tileStates.flatMap((row, y) =>
-        row.map((tile, x) =>
-            tile === 'selected' ? matrix[y][x] : '')).join('')
-}
+import {TileState} from "./TileState";
 
 export function findIndex<T>(array: Array<Array<T>>, value: T) {
     const i1 = array.findIndex((row) => row.some(item => item === value))
@@ -31,11 +27,11 @@ export function unique(array: Point[]) {
         array.findIndex(p => equals(p, value)) === index)
 }
 
-export function getNumberOfSelectedTiles(tileStates: string[][]) {
+export function getNumberOfSelectedTiles(tileStates: TileState[][]) {
     return count(tileStates, 'selected');
 }
 
-export function checkIfSelectionIsContiguous(tileStates: string[][]) {
+export function checkIfSelectionIsContiguous(tileStates: TileState[][]) {
     const height = tileStates.length
     const width = tileStates[0].length
 

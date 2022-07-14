@@ -1,3 +1,5 @@
+import {TileState} from "./TileState";
+
 const PUZZLE_KEY = 'puzzle';
 const SOLUTION_KEY = 'solution';
 
@@ -12,22 +14,22 @@ export function puzzleInLocalStorage() {
 export function readPuzzleFromLocalStorage() {
     const puzzleJson = getPuzzleJson()
     if (puzzleJson) {
-        const [resolvedMatrix, solutionMatrix] = JSON.parse(puzzleJson) as string[][][]
-        return [resolvedMatrix, solutionMatrix]
+        const [matrix, solution] = JSON.parse(puzzleJson) as [string[][], number[][]]
+        return {matrix, solution}
     } else {
         throw Error('Puzzle expected in local storage!')
     }
 }
 
-export function storePuzzleInLocalStorage(puzzle: string[][][]) {
-    localStorage.setItem(PUZZLE_KEY, JSON.stringify(puzzle))
+export function storePuzzleInLocalStorage(matrix: string[][], solution: number[][]) {
+    localStorage.setItem(PUZZLE_KEY, JSON.stringify([matrix, solution]))
 }
 
-export function storeTileStateInLocalStorage(tileState: string[][]) {
+export function storeTileStateInLocalStorage(tileState: TileState[][]) {
     localStorage.setItem(SOLUTION_KEY, JSON.stringify(tileState))
 }
 
 export function readTileStateFromLocalStorage() {
     let item = localStorage.getItem(SOLUTION_KEY) || ''
-    return JSON.parse(item) as string[][]
+    return JSON.parse(item) as TileState[][]
 }

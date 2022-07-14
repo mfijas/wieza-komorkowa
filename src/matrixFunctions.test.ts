@@ -1,19 +1,20 @@
 import {
     checkIfSelectionIsContiguous,
     count,
-    extractSelectedWord,
     findIndex,
     Point,
     unique
 } from "./matrixFunctions";
+import {TileState} from "./TileState";
+import {extractSelectedWord} from "./Status";
 
 test('should extract word from matrix selection', () => {
     // given
-    const tileStates = [
-        ['', 'selected', '', 'selected'],
-        ['', 'selected', '', 'selected'],
-        ['', 'selected', 'selected', 'selected'],
-        ['selected', 'selected', '', ''],
+    const tileStates: TileState[][] = [
+        [1, 'selected', 2, 'selected'],
+        [1, 'selected', 2, 'selected'],
+        [1, 'selected', 'selected', 'selected'],
+        ['selected', 'selected', 'unselected', 'unselected'],
     ]
     const matrix = [
         ['A', 'B', 'C', 'D'],
@@ -62,11 +63,11 @@ test('should count occurrences of an item', () => {
 
 test('should confirm that the region is continuous', () => {
     // given
-    const tileStates = [
-        ['', 'selected', '', 'selected'],
-        ['', 'selected', '', 'selected'],
-        ['', 'selected', 'selected', 'selected'],
-        ['selected', 'selected', '', ''],
+    const tileStates: TileState[][] = [
+        [1, 'selected', 2, 'selected'],
+        [1, 'selected', 3, 'selected'],
+        [1, 'selected', 'selected', 'selected'],
+        ['selected', 'selected', 'unselected', 'unselected'],
     ]
 
     // when
@@ -78,11 +79,11 @@ test('should confirm that the region is continuous', () => {
 
 test('should confirm that the region is continuous (duplicate bug)', () => {
     // given
-    const tileStates = [
-        ['', '', '', ''],
-        ['', 'selected', 'selected', ''],
-        ['', 'selected', 'selected', ''],
-        ['', '', '', ''],
+    const tileStates: TileState[][] = [
+        [1, 1, 1, 1],
+        [2, 'selected', 'selected', 'unselected'],
+        [2, 'selected', 'selected', 'unselected'],
+        [2, 'unselected', 'unselected', 'unselected'],
     ]
 
     // when
@@ -94,11 +95,11 @@ test('should confirm that the region is continuous (duplicate bug)', () => {
 
 test('should confirm that the region is not continuous', () => {
     // given
-    const tileStates = [
-        ['', 'selected', '', 'selected'],
-        ['', 'selected', '', 'selected'],
-        ['', 'selected', 'selected', 'selected'],
-        ['selected', '', '', ''],
+    const tileStates: TileState[][] = [
+        ['unselected', 'selected', 1, 'selected'],
+        ['unselected', 'selected', 1, 'selected'],
+        ['unselected', 'selected', 'selected', 'selected'],
+        ['selected', 2, 2, 2],
     ]
 
     // when

@@ -1,11 +1,12 @@
 import React, {useState} from 'react'
+import {TileState} from "./TileState";
 
 enum MouseState {none, deselecting, selecting}
 
 interface GridProps {
     matrix: string[][]
-    tileState: string[][]
-    updateTileState: (x: number, y: number, newState: string) => void
+    tileState: TileState[][]
+    updateTileState: (x: number, y: number, newState: TileState) => void
     removeWord: (wordNumber: number) => void
 }
 
@@ -14,7 +15,7 @@ export function Grid(props: GridProps) {
 
     const tileState = (x: number, y: number) => props.tileState[y][x]
     const tileSelected = (x: number, y: number) => tileState(x, y) === 'selected'
-    const tileEmpty = (x: number, y: number) => tileState(x, y) === '0'
+    const tileEmpty = (x: number, y: number) => tileState(x, y) === 'unselected'
     const tileContainsWordLetter = (x: number, y: number) => !tileEmpty(x, y) && !tileSelected(x, y)
 
     function selectTile(x: number, y: number) {
@@ -22,13 +23,12 @@ export function Grid(props: GridProps) {
     }
 
     function deselectTile(x: number, y: number) {
-        props.updateTileState(x, y, '0')
+        props.updateTileState(x, y, 'unselected')
     }
 
     function onClick(x: number, y: number) {
         if (tileContainsWordLetter(x, y)) {
-            console.log(`clickety click (${tileState(x, y)})`)
-            props.removeWord(parseInt(tileState(x, y), 32))
+            props.removeWord(tileState(x, y) as number)
         }
     }
 

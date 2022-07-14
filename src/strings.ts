@@ -12,7 +12,7 @@ String.prototype.replaceAt = function (index, replacement) {
 }
 
 
-export function fillMatrix(width: number, height: number, words: string[]): { resolvedMatrix: string[][]; solutionMatrix: string[][] }[] {
+export function fillMatrix(width: number, height: number, words: string[]): { resolvedMatrix: string[][]; solutionMatrix: number[][] }[] {
 
     const emptyMatrix: string = '_'.repeat(height * width)
 
@@ -102,7 +102,7 @@ export function fillMatrix(width: number, height: number, words: string[]): { re
     )
 
     return matrices.map(({solutionMatrix, resolvedMatrix}) => ({
-        solutionMatrix: toMatrix(solutionMatrix),
+        solutionMatrix: toMatrix(solutionMatrix).map(row => row.map(c => parseInt(c, 32))),
         resolvedMatrix: toMatrix(resolvedMatrix)
     }))
 }

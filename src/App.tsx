@@ -12,41 +12,41 @@ import {
     storePuzzleInLocalStorage,
     storeTileStateInLocalStorage
 } from './LocalStorage'
-
-const WIDTH = 7
-const HEIGHT = 12
+import {TileState} from "./TileState";
 
 const NUMBER_OF_WORD_COLOURS = 21
 
-// type Tile = 'selected' | 'empty' | number
-
-function emptyTileState() {
-    return _.chunk(Array<string>(WIDTH * HEIGHT).fill('0'), WIDTH);
+function emptyTileState(width: number, height: number) {
+    return _.chunk(Array<TileState>(width * height).fill('unselected'), width);
 }
 
 function getAllWordNumbers() {
     return [...Array(NUMBER_OF_WORD_COLOURS).keys()].slice(1);
 }
 
-function getUnusedWordNumbers(tileState: string[][]) {
+function getUnusedWordNumbers(tileState: TileState[][]) {
     return _.difference(
         getAllWordNumbers(),
         _.uniq(tileState.flatMap(row =>
                 row
-                    .filter(tile => tile !== 'selected' && parseInt(tile) > 0)
-                    .map(tile => parseInt(tile))
+                    .filter(tile => tile !== 'selected' && tile !== 'unselected')
             )
         )
-    )
+    ) as number[]
 }
 
-function App() {
-    const [tileState, setTileState] = useState<string[][]>()
+interface AppProps {
+    width: number
+    height: number
+}
+
+function App(props: AppProps) {
+    const [tileState, setTileState] = useState<TileState[][]>()
 
     const [availableWordNumbers, setAvailableWordNumbers] = useState<number[]>([])
 
-    const [resolvedMatrix, setResolvedMatrix] = useState<string[][]>([])
-    const [solutionMatrix, setSolutionMatrix] = useState<string[][]>([])
+    const [matrix, setMatrix] = useState<string[][]>([])
+    const [solution, setSolution] = useState<number[][]>([])
 
     useEffect(() => {
         if (tileState !== undefined) {
@@ -57,29 +57,23 @@ function App() {
     useEffect(() => {
         // this below is crap. rewrite it
         if (puzzleInLocalStorage()) {
-            const [resolvedMatrix, solutionMatrix] = readPuzzleFromLocalStorage()
-            setResolvedMatrix(resolvedMatrix)
-            setSolutionMatrix(solutionMatrix)
+            const {matrix, solution} = readPuzzleFromLocalStorage()
+            setMatrix(matrix)
+            setSolution(solution)
             const storedTileState = readTileStateFromLocalStorage()
             setTileState(storedTileState)
             setAvailableWordNumbers(getUnusedWordNumbers(storedTileState))
         } else {
-            const {matrix, solution} = generatePuzzle(WIDTH, HEIGHT)
-            storePuzzleInLocalStorage([matrix, solution])
-            setResolvedMatrix(matrix)
-            setSolutionMatrix(solution)
-            let newTileState = emptyTileState()
+            const {matrix, solution} = generatePuzzle(props.width, props.height)
+            storePuzzleInLocalStorage(matrix, solution)
+            setMatrix(matrix)
+            setSolution(solution)
+            let newTileState = emptyTileState(props.width, props.height)
             setTileState(newTileState)
             storeTileStateInLocalStorage(newTileState)
             setAvailableWordNumbers(getAllWordNumbers())
         }
-    }, [])
-
-    useEffect(() => {
-        if (tileState) {
-            storeTileStateInLocalStorage(tileState)
-        }
-    }, [tileState])
+    }, [props.width, props.height])
 
     function popNextWordNumber() {
         if (availableWordNumbers.length === 0) {
@@ -97,48 +91,44 @@ function App() {
         const nextMarkedWordNumber = popNextWordNumber()
         const newTileState = tileState!.map(row =>
             row.map(tile =>
-                tile === 'selected' ? nextMarkedWordNumber.toString(32) : tile))
+                tile === 'selected' ? nextMarkedWordNumber : tile))
         setTileState(newTileState)
     }
 
     function removeWord(wordNumber: number) {
         const newTileState = tileState!.map(row =>
             row.map(tile =>
-                tile === wordNumber.toString(32) ? '0' : tile))
+                tile === wordNumber ? 'unselected' : tile))
         setTileState(newTileState)
         pushNextWordNumber(wordNumber)
     }
 
-    if (tileState) {
-        return (
-            <div id='app'>
-                <Grid
-                    matrix={resolvedMatrix}
-                    tileState={tileState}
-                    updateTileState={(x: number, y: number, newState: string) =>
-                        setTileState(tileState => set(tileState!, y, x, newState))}
-                    removeWord={removeWord}
-                />
-                <Status
-                    matrix={resolvedMatrix}
-                    tileState={tileState}
-                    markWord={markWord}
-                />
-                <table>
-                    <tbody>
-                    {resolvedMatrix.map((row, y) =>
-                        <tr key={'r_' + y}>
-                            {row.map((cell, x) =>
-                                <td key={'c_' + y + '_' + x} className={'t' + solutionMatrix[y][x]}>{cell}</td>
-                            )}
-                        </tr>)}
-                    </tbody>
-                </table>
-            </div>
-        )
-    } else {
-        return <></>
-    }
+    return tileState ? (
+        <div id='app'>
+            <Grid
+                matrix={matrix}
+                tileState={tileState}
+                updateTileState={(x: number, y: number, newState: TileState) =>
+                    setTileState(tileState => set(tileState!, y, x, newState))}
+                removeWord={removeWord}
+            />
+            <Status
+                matrix={matrix}
+                tileState={tileState}
+                markWord={markWord}
+            />
+            <table>
+                <tbody>
+                {matrix.map((row, y) =>
+                    <tr key={'r_' + y}>
+                        {row.map((cell, x) =>
+                            <td key={'c_' + y + '_' + x} className={'t' + solution[y][x]}>{cell}</td>
+                        )}
+                    </tr>)}
+                </tbody>
+            </table>
+        </div>
+    ) : <></>;
 }
 
 export default App

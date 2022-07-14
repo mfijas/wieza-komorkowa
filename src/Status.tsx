@@ -1,11 +1,18 @@
-import {checkIfSelectionIsContiguous, extractSelectedWord, getNumberOfSelectedTiles} from './matrixFunctions'
+import {checkIfSelectionIsContiguous, getNumberOfSelectedTiles} from './matrixFunctions'
 import {words} from './words'
 import React from 'react'
+import {TileState} from "./TileState";
 
 interface StatusParams {
     matrix: string[][]
-    tileState: string[][]
+    tileState: TileState[][]
     markWord: () => void
+}
+
+export function extractSelectedWord(matrix: string[][], tileStates: TileState[][]) {
+    return tileStates.flatMap((row, y) =>
+        row.map((tile, x) =>
+            tile === 'selected' ? matrix[y][x] : '')).join('')
 }
 
 export function Status({matrix, tileState, markWord}: StatusParams) {
