@@ -12,7 +12,7 @@ import {
     storePuzzleInLocalStorage,
     storeTileStateInLocalStorage
 } from './LocalStorage'
-import {TileState} from "./TileState";
+import {TileState} from "./TileState"
 
 const NUMBER_OF_WORD_COLOURS = 21
 
@@ -128,7 +128,7 @@ function App(props: AppProps) {
                 </tbody>
             </table>
         </div>
-    ) : <></>;
+    ) : <></>
 }
 
 export default App

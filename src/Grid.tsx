@@ -67,7 +67,7 @@ export function Grid(props: GridProps) {
         }
     }
 
-    const margin = 8
+    const margin = 7
     return (
         <div id='grid'>
             {props.matrix.map((row, y) =>
