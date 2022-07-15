@@ -7,10 +7,10 @@ declare global {
     }
 }
 
+// eslint-disable-next-line no-extend-native
 String.prototype.replaceAt = function (index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + replacement.length);
 }
-
 
 export function fillMatrix(width: number, height: number, words: string[]): { resolvedMatrix: string[][]; solutionMatrix: number[][] }[] {
 
@@ -26,11 +26,6 @@ export function fillMatrix(width: number, height: number, words: string[]): { re
         const x = index % width
         return [x, y]
     }
-
-    function countEmptyCells(matrix: string) {
-        return matrix.split('').filter(c => c === '_').length
-    }
-
 
     function toMatrix(matrix: string): string[][] {
         return _.chunk(matrix.split(''), width)
