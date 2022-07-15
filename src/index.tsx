@@ -35,7 +35,7 @@ function resizeFont() {
         getCssRule(selectorText).style.fontSize = `${fontSize}px`
     }
 
-    const fontSize = window.innerHeight * 0.0385
+    const fontSize = window.innerHeight * 0.0357
 
     setFontSizeForElement('body', fontSize);
     setFontSizeForElement('button', fontSize);

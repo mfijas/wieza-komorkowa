@@ -13,6 +13,8 @@ import {
     storeTileStateInLocalStorage
 } from './LocalStorage'
 import {TileState} from "./TileState"
+import {Header} from "./Header";
+import {Menu} from "./Menu";
 
 const NUMBER_OF_WORD_COLOURS = 21
 
@@ -47,6 +49,8 @@ function App(props: AppProps) {
 
     const [matrix, setMatrix] = useState<string[][]>([])
     const [solution, setSolution] = useState<number[][]>([])
+
+    const [currentScreen, setCurrentScreen] = useState<'game' | 'menu'>('game')
 
     useEffect(() => {
         if (tileState !== undefined) {
@@ -103,32 +107,57 @@ function App(props: AppProps) {
         pushNextWordNumber(wordNumber)
     }
 
-    return tileState ? (
-        <div id='app'>
-            <Grid
-                matrix={matrix}
-                tileState={tileState}
-                updateTileState={(x: number, y: number, newState: TileState) =>
-                    setTileState(tileState => set(tileState!, y, x, newState))}
-                removeWord={removeWord}
-            />
-            <Status
-                matrix={matrix}
-                tileState={tileState}
-                markWord={markWord}
-            />
-            <table>
-                <tbody>
-                {matrix.map((row, y) =>
-                    <tr key={'r_' + y}>
-                        {row.map((cell, x) =>
-                            <td key={'c_' + y + '_' + x} className={'t' + solution[y][x]}>{cell}</td>
-                        )}
-                    </tr>)}
-                </tbody>
-            </table>
-        </div>
-    ) : <></>
+
+    function renderScreen(currentScreen: "game" | "menu") {
+        switch (currentScreen) {
+            case 'game':
+                if (tileState) {
+                    return (
+                        <>
+                            <Grid
+                                matrix={matrix}
+                                tileState={tileState}
+                                updateTileState={(x: number, y: number, newState: TileState) =>
+                                    setTileState(tileState => set(tileState!, y, x, newState))}
+                                removeWord={removeWord}
+                            />
+                            <Status
+                                matrix={matrix}
+                                tileState={tileState}
+                                markWord={markWord}
+                            />
+                            <table>
+                                <tbody>
+                                {matrix.map((row, y) =>
+                                    <tr key={'r_' + y}>
+                                        {row.map((cell, x) =>
+                                            <td key={'c_' + y + '_' + x} className={'t' + solution[y][x]}>{cell}</td>
+                                        )}
+                                    </tr>)}
+                                </tbody>
+                            </table>
+                        </>
+                    )
+                } else {
+                    return <></>
+                }
+            case 'menu':
+                return <Menu/>
+        }
+    }
+
+    function burgerClicked() {
+        setCurrentScreen(currentScreen === 'menu' ? 'game' : 'menu');
+    }
+
+    return (
+        <>
+            <div id='app'>
+                <Header onClick={burgerClicked}/>
+                {renderScreen(currentScreen)}
+            </div>
+        </>
+    )
 }
 
 export default App

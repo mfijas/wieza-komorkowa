@@ -28,26 +28,26 @@ export function Status({matrix, tileState, markWord}: StatusParams) {
     let message: string
     let disabled: boolean
     if (getNumberOfSelectedTiles(tileState) === 0) {
-        message = 'Enter word'
+        message = 'Zaznacz słowo'
         disabled = true
     } else if (checkIfSelectionIsContiguous(tileState)) {
         if (selectedWord.length < 4) {
-            message = 'Too short: ' + selectedWord.toUpperCase()
+            message = 'Za krótkie: ' + selectedWord.toUpperCase()
             disabled = true
         } else if (selectedWord.length > 8) {
-            message = 'Too long'
+            message = 'Za długie słowo!'
             disabled = true
         } else {
             if (isProperWord(selectedWord)) {
-                message = 'Add word: ' + selectedWord.toUpperCase()
+                message = 'Dodaj słowo: ' + selectedWord.toUpperCase()
                 disabled = false
             } else {
-                message = 'Not a word: ' + selectedWord.toUpperCase()
+                message = 'To nie słowo: ' + selectedWord.toUpperCase()
                 disabled = true
             }
         }
     } else {
-        message = 'Selection must be contiguous'
+        message = 'Obszar musi być ciągły'
         disabled = true
     }
 
