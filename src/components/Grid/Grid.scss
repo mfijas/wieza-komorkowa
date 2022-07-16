@@ -15,11 +15,11 @@ $colors: ('unselected', #a9a9a9, black),
         ('11', #dcbeff, black),
         ('12', #9A6324, white),
         ('13', #fffac8, black),
-        ('14', #d20f0f, white),
+        ('14', #808000, white),
         ('15', #aaffc3, black),
-        ('16', #808000, white),
+        ('16', #000075, white),
         ('17', #ffd8b1, black),
-        ('18', #000075, white);
+        ('18', #d20f0f, white);
 
 @each $color in $colors {
   .t#{nth($color, 1)} {

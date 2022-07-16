@@ -9,10 +9,10 @@ import { generatePuzzle } from '../../puzzle/GeneratePuzzle';
 import { emptyTileState, TileState } from './tileState';
 import _ from 'lodash';
 
-const NUMBER_OF_WORD_COLOURS = 21;
+const NUMBER_OF_WORD_COLOURS = 18;
 
 function getAllWordNumbers() {
-    return [...Array(NUMBER_OF_WORD_COLOURS).keys()].slice(1);
+    return [...Array(NUMBER_OF_WORD_COLOURS + 1).keys()].slice(1);
 }
 
 function getUnusedWordNumbers(tileState: TileState[][]) {
