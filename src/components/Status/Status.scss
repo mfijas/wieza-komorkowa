@@ -13,6 +13,10 @@
 }
 
 .status rect {
+  fill: #e6194B;
+}
+
+.status button:disabled rect {
   fill: #4363d8;
 }
 
