@@ -1,12 +1,6 @@
-import {
-    checkIfSelectionIsContiguous,
-    count,
-    findIndex,
-    Point,
-    unique
-} from "./matrixFunctions";
-import {TileState} from "./TileState";
-import {extractSelectedWord} from "./Status";
+import { checkIfSelectionIsContiguous, count, findIndex, Point, unique } from './matrixFunctions';
+import { TileState } from './TileState';
+import { extractSelectedWord } from './Status';
 
 test('should extract word from matrix selection', () => {
     // given
@@ -14,22 +8,22 @@ test('should extract word from matrix selection', () => {
         [1, 'selected', 2, 'selected'],
         [1, 'selected', 2, 'selected'],
         [1, 'selected', 'selected', 'selected'],
-        ['selected', 'selected', 'unselected', 'unselected'],
-    ]
+        ['selected', 'selected', 'unselected', 'unselected']
+    ];
     const matrix = [
         ['A', 'B', 'C', 'D'],
         ['E', 'F', 'G', 'H'],
         ['I', 'J', 'K', 'L'],
-        ['M', 'N', 'O', 'P'],
-    ]
+        ['M', 'N', 'O', 'P']
+    ];
 
     // when
-    const word = extractSelectedWord(matrix, tileStates)
+    const word = extractSelectedWord(matrix, tileStates);
 
     // then
-    const expectedWord = 'BDFHJKLMN'
-    expect(word).toEqual(expectedWord)
-})
+    const expectedWord = 'BDFHJKLMN';
+    expect(word).toEqual(expectedWord);
+});
 
 test('should find index of first occurrence of an item', () => {
     // given
@@ -37,14 +31,14 @@ test('should find index of first occurrence of an item', () => {
         ['1', '2', '3'],
         ['4', '5', '5'],
         ['5', '5', '9']
-    ]
+    ];
 
     // when
-    const p = findIndex(matrix, '5')
+    const p = findIndex(matrix, '5');
 
     // then
-    expect(p).toEqual([1, 1])
-})
+    expect(p).toEqual([1, 1]);
+});
 
 test('should count occurrences of an item', () => {
     // given
@@ -52,14 +46,14 @@ test('should count occurrences of an item', () => {
         ['1', '2', '3'],
         ['4', '5', '5'],
         ['5', '5', '9']
-    ]
+    ];
 
     // when
-    const fiveCount = count(matrix, '5')
+    const fiveCount = count(matrix, '5');
 
     // then
-    expect(fiveCount).toEqual(4)
-})
+    expect(fiveCount).toEqual(4);
+});
 
 test('should confirm that the region is continuous', () => {
     // given
@@ -67,15 +61,15 @@ test('should confirm that the region is continuous', () => {
         [1, 'selected', 2, 'selected'],
         [1, 'selected', 3, 'selected'],
         [1, 'selected', 'selected', 'selected'],
-        ['selected', 'selected', 'unselected', 'unselected'],
-    ]
+        ['selected', 'selected', 'unselected', 'unselected']
+    ];
 
     // when
-    const isContinuous = checkIfSelectionIsContiguous(tileStates)
+    const isContinuous = checkIfSelectionIsContiguous(tileStates);
 
     // then
-    expect(isContinuous).toBeTruthy()
-})
+    expect(isContinuous).toBeTruthy();
+});
 
 test('should confirm that the region is continuous (duplicate bug)', () => {
     // given
@@ -83,15 +77,15 @@ test('should confirm that the region is continuous (duplicate bug)', () => {
         [1, 1, 1, 1],
         [2, 'selected', 'selected', 'unselected'],
         [2, 'selected', 'selected', 'unselected'],
-        [2, 'unselected', 'unselected', 'unselected'],
-    ]
+        [2, 'unselected', 'unselected', 'unselected']
+    ];
 
     // when
-    const isContinuous = checkIfSelectionIsContiguous(tileStates)
+    const isContinuous = checkIfSelectionIsContiguous(tileStates);
 
     // then
-    expect(isContinuous).toBeTruthy()
-})
+    expect(isContinuous).toBeTruthy();
+});
 
 test('should confirm that the region is not continuous', () => {
     // given
@@ -99,15 +93,15 @@ test('should confirm that the region is not continuous', () => {
         ['unselected', 'selected', 1, 'selected'],
         ['unselected', 'selected', 1, 'selected'],
         ['unselected', 'selected', 'selected', 'selected'],
-        ['selected', 2, 2, 2],
-    ]
+        ['selected', 2, 2, 2]
+    ];
 
     // when
-    const isContinuous = checkIfSelectionIsContiguous(tileStates)
+    const isContinuous = checkIfSelectionIsContiguous(tileStates);
 
     // then
-    expect(isContinuous).toBeFalsy()
-})
+    expect(isContinuous).toBeFalsy();
+});
 
 test('unique() should return a unique list of Points', () => {
     // given
@@ -118,15 +112,15 @@ test('unique() should return a unique list of Points', () => {
         [1, 2],
         [2, 1],
         [2, 1]
-    ] as Point[]
+    ] as Point[];
 
     // when
-    const uniquePoints = unique(points)
+    const uniquePoints = unique(points);
 
     // then
     expect(uniquePoints).toEqual([
         [1, 1],
         [1, 2],
         [2, 1]
-    ])
-})
+    ]);
+});

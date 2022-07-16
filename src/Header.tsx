@@ -1,16 +1,16 @@
-import {FaBars} from "react-icons/fa";
+import { FaBars } from 'react-icons/fa';
 
 interface HeaderProps {
-    onClick: () => void
+    onClick: () => void;
 }
 
 export function Header(props: HeaderProps) {
     return (
-        <div className='header'>
+        <div className="header">
             <button onClick={() => props.onClick()}>
                 <FaBars/>
             </button>
-            <div className='title'>Wieża komórkowa</div>
+            <div className="title">Wieża komórkowa</div>
         </div>
-    )
+    );
 }

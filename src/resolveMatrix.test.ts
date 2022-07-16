@@ -1,4 +1,4 @@
-import {resolveMatrix} from "./resolveMatrix";
+import { resolveMatrix } from './resolveMatrix';
 
 test('should replace numbers with words', () => {
     // given
@@ -6,21 +6,21 @@ test('should replace numbers with words', () => {
     00112
     30112
     33444
-    `.replaceAll(/\s/g, '')
+    `.replaceAll(/\s/g, '');
     const words = [
         'abc',
         'defg',
         'hi',
         'jkl',
         'mno'
-    ]
+    ];
 
     // when
-    const resolvedMatrix = resolveMatrix(matrix, words)
+    const resolvedMatrix = resolveMatrix(matrix, words);
 
     // then
-    expect(resolvedMatrix).toBe("abdehjcfgiklmno")
-})
+    expect(resolvedMatrix).toBe('abdehjcfgiklmno');
+});
 
 test('should not fail for 10th word', () => {
     // given
@@ -28,7 +28,7 @@ test('should not fail for 10th word', () => {
     01234
     56789
     aaaaa
-    `.replaceAll(/\s/g, '')
+    `.replaceAll(/\s/g, '');
     const words = [
         'a',
         'b',
@@ -41,12 +41,12 @@ test('should not fail for 10th word', () => {
         'i',
         'j',
         '01234'
-    ]
+    ];
 
     // when
-    const resolvedMatrix = resolveMatrix(matrix, words)
+    const resolvedMatrix = resolveMatrix(matrix, words);
 
     // then
-    expect(resolvedMatrix).toBe("abcdefghij01234")
+    expect(resolvedMatrix).toBe('abcdefghij01234');
 
-})
+});

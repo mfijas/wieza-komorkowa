@@ -1,4 +1,3 @@
-
 export const words = [
     'absurd',
     'absurdzie',
@@ -53908,4 +53907,4 @@ export const words = [
     'nieósmego',
     'nieósmi',
     ''
-]
+];
