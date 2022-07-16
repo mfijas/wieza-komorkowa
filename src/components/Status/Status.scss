@@ -1,0 +1,24 @@
+@use 'src/components/variables';
+
+.status {
+  width: variables.$cols*2em;
+}
+
+.status button {
+  width: 100%;
+  height: 2em;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.status rect {
+  fill: #4363d8;
+}
+
+.status text {
+  fill: white;
+  font-size: 6pt;
+  dominant-baseline: central;
+  text-anchor: middle;
+}

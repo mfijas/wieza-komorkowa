@@ -1,4 +1,5 @@
 import { FaBars } from 'react-icons/fa';
+import './Header.scss';
 
 interface HeaderProps {
     onClick: () => void;

@@ -1,0 +1,16 @@
+@use 'src/components/variables';
+
+// it will get overridden to fit screen
+$fontSize: 20px;
+body {
+  font-size: $fontSize;
+}
+
+button {
+  font-size: $fontSize;
+}
+
+#app {
+  margin: auto;
+  width: variables.$cols*2em;
+}

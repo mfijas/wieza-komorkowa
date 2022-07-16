@@ -1,4 +1,4 @@
-import { TileState } from './TileState';
+import { TileState } from '../components/App/tileState';
 
 export function findIndex<T>(array: Array<Array<T>>, value: T) {
     const i1 = array.findIndex((row) => row.some(item => item === value));

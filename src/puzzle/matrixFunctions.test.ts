@@ -1,6 +1,6 @@
 import { checkIfSelectionIsContiguous, count, findIndex, Point, unique } from './matrixFunctions';
-import { TileState } from './TileState';
-import { extractSelectedWord } from './Status';
+import { TileState } from '../components/App/tileState';
+import { extractSelectedWord } from '../components/Status/Status';
 
 test('should extract word from matrix selection', () => {
     // given

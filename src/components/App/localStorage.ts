@@ -1,4 +1,4 @@
-import { TileState } from './TileState';
+import { TileState } from './tileState';
 
 const PUZZLE_KEY = 'puzzle';
 const SOLUTION_KEY = 'solution';

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import './App.scss';
 import _ from 'lodash';
-import { set } from './funtools';
-import { Grid } from './Grid';
-import { Status } from './Status';
-import { storeTileStateInLocalStorage } from './LocalStorage';
-import { TileState } from './TileState';
-import { Header } from './Header';
-import { Menu } from './Menu';
-import addResizeListener from './ResizeListener';
+import { set } from '../../puzzle/funtools';
+import { Grid } from '../Grid/Grid';
+import { Status } from '../Status/Status';
+import { storeTileStateInLocalStorage } from './localStorage';
+import { TileState } from './tileState';
+import { Header } from '../Header/Header';
+import { Menu } from '../Menu/Menu';
+import addResizeListener from './resizeListener';
 import {
     generatePuzzleStateAndStoreInLocalStorage,
     readPuzzleStateFromLocalStorage

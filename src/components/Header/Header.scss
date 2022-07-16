@@ -1,0 +1,23 @@
+@use 'src/components/variables';
+
+.header {
+  height: 2em;
+  display: grid;
+  grid-template-columns: 1fr (variables.$cols - 1fr);
+}
+
+.header button {
+  padding: 0;
+  margin: 0.15em;
+  border-radius: 0.15em;
+  border-width: 0;
+  background-color: darkgrey;
+}
+
+.title {
+  margin: 0.15em;
+  border-radius: 0.15em;
+  text-align: center;
+  line-height: 1.7em;
+  background-color: darkgrey;
+}

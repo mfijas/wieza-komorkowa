@@ -1,6 +1,7 @@
-import { checkIfSelectionIsContiguous, getNumberOfSelectedTiles } from './matrixFunctions';
-import { words } from './words';
-import { TileState } from './TileState';
+import { checkIfSelectionIsContiguous, getNumberOfSelectedTiles } from '../../puzzle/matrixFunctions';
+import { words } from '../../puzzle/words';
+import { TileState } from '../App/tileState';
+import './Status.scss';
 
 interface StatusParams {
     matrix: string[][];

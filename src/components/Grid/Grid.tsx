@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { TileState } from './TileState';
+import { TileState } from '../App/tileState';
+import './Grid.scss';
 
 // this looks like a bug in eslint?!
 // eslint-disable-next-line no-unused-vars

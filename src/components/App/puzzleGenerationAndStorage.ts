@@ -4,9 +4,9 @@ import {
     readTileStateFromLocalStorage,
     storePuzzleInLocalStorage,
     storeTileStateInLocalStorage
-} from './LocalStorage';
-import { generatePuzzle } from './GeneratePuzzle';
-import { emptyTileState, TileState } from './TileState';
+} from './localStorage';
+import { generatePuzzle } from '../../puzzle/GeneratePuzzle';
+import { emptyTileState, TileState } from './tileState';
 import _ from 'lodash';
 
 const NUMBER_OF_WORD_COLOURS = 21;
