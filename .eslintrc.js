@@ -26,13 +26,15 @@ module.exports = {
     rules: {
         'padded-blocks': 'off',
         'space-before-function-paren': ['warn', 'never'],
-        'indent': ['warn', 4, { 'SwitchCase': 1 }],
+        // temporarily disabling indent rules -- Idea&ESLint inconsistency
+        // 'indent': ['warn', 4, { 'SwitchCase': 1 }],
+        // 'react/jsx-indent': ['warn', 4],
+        'indent': 'off',
         'quote-props': 'off',
         'multiline-ternary': 'off',
         'react-hooks/rules-of-hooks': 'error',
         'react-hooks/exhaustive-deps': 'warn',
         'semi': ['off'],
-        '@typescript-eslint/semi': ['error', 'always'],
-        'react/jsx-indent': ['warn', 4]
+        '@typescript-eslint/semi': ['error', 'always']
     }
 };
