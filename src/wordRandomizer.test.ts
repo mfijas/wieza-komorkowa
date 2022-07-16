@@ -1,7 +1,6 @@
 import { randomizeWordLengths, randomizeWords } from './wordRandomizer';
 import _ from 'lodash';
 
-
 test('randomized numbers should sum up to desired sum', () => {
     // given
     const totalLength = 100;

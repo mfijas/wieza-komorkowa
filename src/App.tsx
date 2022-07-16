@@ -4,34 +4,15 @@ import _ from 'lodash';
 import { set } from './funtools';
 import { Grid } from './Grid';
 import { Status } from './Status';
-import { generatePuzzle } from './GeneratePuzzle';
-import {
-    puzzleInLocalStorage,
-    readPuzzleFromLocalStorage,
-    readTileStateFromLocalStorage,
-    storePuzzleInLocalStorage,
-    storeTileStateInLocalStorage
-} from './LocalStorage';
-import { emptyTileState, TileState } from './TileState';
+import { storeTileStateInLocalStorage } from './LocalStorage';
+import { TileState } from './TileState';
 import { Header } from './Header';
 import { Menu } from './Menu';
 import addResizeListener from './ResizeListener';
-
-const NUMBER_OF_WORD_COLOURS = 21;
-
-function getAllWordNumbers() {
-    return [...Array(NUMBER_OF_WORD_COLOURS).keys()].slice(1);
-}
-
-function getUnusedWordNumbers(tileState: TileState[][]) {
-    return _.difference(
-        getAllWordNumbers(),
-        _.uniq(tileState.flatMap(row =>
-                row.filter(tile => tile !== 'selected' && tile !== 'unselected')
-            )
-        )
-    ) as number[];
-}
+import {
+    generatePuzzleStateAndStoreInLocalStorage,
+    readPuzzleStateFromLocalStorage
+} from './puzzleGenerationAndStorage';
 
 interface AppProps {
     width: number;
@@ -59,43 +40,17 @@ function App(props: AppProps) {
     }, [tileState]);
 
     useEffect(() => {
-        function readPuzzleStateFromLocalStorage() {
-            const { matrix, solution } = readPuzzleFromLocalStorage();
-            const storedTileState = readTileStateFromLocalStorage();
-            const availableWordNumbers = getUnusedWordNumbers(storedTileState);
-            return { matrix, solution, storedTileState, availableWordNumbers };
-        }
+        const {
+            matrix,
+            solution,
+            tileState,
+            availableWordNumbers
+        } = readPuzzleStateFromLocalStorage() || generatePuzzleStateAndStoreInLocalStorage(props.width, props.height);
 
-        function generatePuzzleStateAndStoreInLocalStorage() {
-            const { matrix, solution } = generatePuzzle(props.width, props.height);
-            storePuzzleInLocalStorage(matrix, solution);
-            const newTileState = emptyTileState(props.width, props.height);
-            storeTileStateInLocalStorage(newTileState);
-            const availableWordNumbers = getAllWordNumbers();
-            return { matrix, solution, newTileState, availableWordNumbers };
-        }
-
-        // this below is crap. rewrite it
-        if (puzzleInLocalStorage()) {
-            const { matrix, solution, storedTileState, availableWordNumbers } = readPuzzleStateFromLocalStorage();
-
-            setMatrix(matrix);
-            setSolution(solution);
-            setTileState(storedTileState);
-            setAvailableWordNumbers(availableWordNumbers);
-        } else {
-            const {
-                matrix,
-                solution,
-                newTileState,
-                availableWordNumbers
-            } = generatePuzzleStateAndStoreInLocalStorage();
-
-            setMatrix(matrix);
-            setSolution(solution);
-            setTileState(newTileState);
-            setAvailableWordNumbers(availableWordNumbers);
-        }
+        setMatrix(matrix);
+        setSolution(solution);
+        setTileState(tileState);
+        setAvailableWordNumbers(availableWordNumbers);
     }, [props.width, props.height]);
 
     function popNextWordNumber() {
@@ -165,7 +120,7 @@ function App(props: AppProps) {
     }
 
     function burgerClicked() {
-        setCurrentScreen(currentScreen === 'menu' ? 'game' : 'menu');
+        setCurrentScreen(currentScreen === 'game' ? 'menu' : 'game');
     }
 
     return (

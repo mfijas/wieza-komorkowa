@@ -1,23 +1,21 @@
 export default function addResizeListener() {
-    function resizeFont() {
-        function getCssRule(selectorText: string) {
-            for (const cssRule of document.styleSheets[1].cssRules) {
-                const cssStyleRule = cssRule as CSSStyleRule;
-                if (cssStyleRule.selectorText === selectorText) {
-                    return cssStyleRule;
-                }
+    function getCssRule(selectorText: string) {
+        for (const cssRule of document.styleSheets[1].cssRules) {
+            const cssStyleRule = cssRule as CSSStyleRule;
+            if (cssStyleRule.selectorText === selectorText) {
+                return cssStyleRule;
             }
-            throw new Error(`Rule for ${selectorText} not found!`);
         }
+        throw new Error(`Rule for ${selectorText} not found!`);
+    }
 
-        function setFontSizeForElement(selectorText: string, fontSize: number) {
-            getCssRule(selectorText).style.fontSize = `${fontSize}px`;
-        }
+    const cssRules = ['body', 'button'].map(elem => getCssRule(elem));
 
+    function resizeFont() {
         const fontSize = window.innerHeight * 0.0357;
-
-        setFontSizeForElement('body', fontSize);
-        setFontSizeForElement('button', fontSize);
+        cssRules.forEach(cssRule => {
+            cssRule.style.fontSize = `${fontSize}px`;
+        });
     }
 
     window.addEventListener('resize', resizeFont);

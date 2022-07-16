@@ -5,6 +5,6 @@ test('should generate a random puzzle', () => {
     const { matrix, solution } = generatePuzzle(10, 10);
 
     // then
-    console.log(matrix);
-    console.log(solution);
+    // console.log(matrix);
+    // console.log(solution);
 });

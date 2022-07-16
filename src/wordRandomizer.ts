@@ -19,7 +19,7 @@ export function randomizeWordLengths(totalLength: number) {
     return lengths;
 }
 
-export function randomizeWord(length: number) {
+function randomizeWord(length: number) {
     const wordsOfGivenLength = words.filter(w => w.length === length);
     return wordsOfGivenLength[_.random(wordsOfGivenLength.length - 1)];
 }
