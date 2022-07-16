@@ -15,6 +15,7 @@ import {
 import {TileState} from "./TileState"
 import {Header} from "./Header";
 import {Menu} from "./Menu";
+import addResizeListener from "./ResizeListener";
 
 const NUMBER_OF_WORD_COLOURS = 21
 
@@ -51,6 +52,10 @@ function App(props: AppProps) {
     const [solution, setSolution] = useState<number[][]>([])
 
     const [currentScreen, setCurrentScreen] = useState<'game' | 'menu'>('game')
+
+    useEffect(() => {
+        addResizeListener()
+    }, [])
 
     useEffect(() => {
         if (tileState !== undefined) {

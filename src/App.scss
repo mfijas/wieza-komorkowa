@@ -1,5 +1,4 @@
 $cols: 7;
-$rows: 12;
 
 $colors: ('unselected', #a9a9a9, black),
         ('selected', #e6194B, white),
@@ -42,13 +41,14 @@ $fontSize: 20px;
 body {
   font-size: $fontSize;
 }
+
 button {
   font-size: $fontSize;
 }
 
 #app {
   margin: auto;
-  width: ($cols*2)*1em;
+  width: $cols*2em;
 }
 
 #grid {
@@ -72,11 +72,10 @@ button {
 
 .grey {
   background-color: #a9a9a9;
-  /*color: white;*/
 }
 
 .status {
-  width: ($cols*2)*1em;
+  width: $cols*2em;
 }
 
 .status button {
@@ -101,7 +100,7 @@ button {
 .header {
   height: 2em;
   display: grid;
-  grid-template-columns: 1fr 6fr;
+  grid-template-columns: 1fr ($cols - 1fr);
 }
 
 .header button {
