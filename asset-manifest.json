@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.423393fe.css",
-    "main.js": "/static/js/main.da48420d.js",
-    "static/js/787.10371177.chunk.js": "/static/js/787.10371177.chunk.js",
-    "index.html": "/index.html",
-    "main.423393fe.css.map": "/static/css/main.423393fe.css.map",
-    "main.da48420d.js.map": "/static/js/main.da48420d.js.map",
-    "787.10371177.chunk.js.map": "/static/js/787.10371177.chunk.js.map"
+    "main.css": "/wieza-komorkowa/static/css/main.423393fe.css",
+    "main.js": "/wieza-komorkowa/static/js/main.1a9c0ba1.js",
+    "static/js/787.10371177.chunk.js": "/wieza-komorkowa/static/js/787.10371177.chunk.js",
+    "index.html": "/wieza-komorkowa/index.html",
+    "main.423393fe.css.map": "/wieza-komorkowa/static/css/main.423393fe.css.map",
+    "main.1a9c0ba1.js.map": "/wieza-komorkowa/static/js/main.1a9c0ba1.js.map",
+    "787.10371177.chunk.js.map": "/wieza-komorkowa/static/js/787.10371177.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.423393fe.css",
-    "static/js/main.da48420d.js"
+    "static/js/main.1a9c0ba1.js"
   ]
 }
