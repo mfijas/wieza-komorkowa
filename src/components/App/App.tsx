@@ -8,7 +8,6 @@ import { storeTileStateInLocalStorage } from './localStorage';
 import { TileState } from './tileState';
 import { Header } from '../Header/Header';
 import { Menu } from '../Menu/Menu';
-import addResizeListener from './resizeListener';
 import {
     generatePuzzleStateAndStoreInLocalStorage,
     readPuzzleStateFromLocalStorage
@@ -28,10 +27,6 @@ function App(props: AppProps) {
     const [solution, setSolution] = useState<number[][]>([]);
 
     const [currentScreen, setCurrentScreen] = useState<'game' | 'menu'>('game');
-
-    useEffect(() => {
-        addResizeListener();
-    }, []);
 
     useEffect(() => {
         if (tileState !== undefined) {
