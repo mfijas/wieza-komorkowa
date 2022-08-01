@@ -1,5 +1,5 @@
 import { checkIfSelectionIsContiguous, getNumberOfSelectedTiles } from '../../puzzle/matrixFunctions';
-import { words } from '../../puzzle/words';
+import { allWords } from '../../puzzle/words';
 import { TileState } from '../App/tileState';
 import './Status.scss';
 
@@ -17,7 +17,7 @@ export function extractSelectedWord(matrix: string[][], tileStates: TileState[][
 
 export function Status({ matrix, tileState, markWord }: StatusParams) {
     const selectedWord = extractSelectedWord(matrix, tileState);
-    const isProperWord = (selectedWord: string) => words.indexOf(selectedWord) !== -1;
+    const isProperWord = (selectedWord: string) => allWords.indexOf(selectedWord) !== -1;
 
     function onClick() {
         if (isProperWord(selectedWord)) {
@@ -53,9 +53,9 @@ export function Status({ matrix, tileState, markWord }: StatusParams) {
 
     const margin = 1;
     return (
-        <div className='status'>
+        <div className="status">
             <button onClick={() => onClick()} style={{ width: '100%', height: '2em' }} disabled={disabled}>
-                <svg viewBox='0 0 100 14'>
+                <svg viewBox="0 0 100 14">
                     <rect
                         x={margin}
                         y={margin}
@@ -64,7 +64,7 @@ export function Status({ matrix, tileState, markWord }: StatusParams) {
                         rx={margin}
                         ry={margin}
                     />
-                    <text x='50%' y='50%'>{message}</text>
+                    <text x="50%" y="50%">{message}</text>
                 </svg>
             </button>
         </div>
