@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/wieza-komorkowa/static/css/main.423393fe.css",
-    "main.js": "/wieza-komorkowa/static/js/main.dac74bc6.js",
+    "main.css": "/wieza-komorkowa/static/css/main.11d6acce.css",
+    "main.js": "/wieza-komorkowa/static/js/main.77131c69.js",
     "static/js/787.10371177.chunk.js": "/wieza-komorkowa/static/js/787.10371177.chunk.js",
     "index.html": "/wieza-komorkowa/index.html",
-    "main.423393fe.css.map": "/wieza-komorkowa/static/css/main.423393fe.css.map",
-    "main.dac74bc6.js.map": "/wieza-komorkowa/static/js/main.dac74bc6.js.map",
+    "main.11d6acce.css.map": "/wieza-komorkowa/static/css/main.11d6acce.css.map",
+    "main.77131c69.js.map": "/wieza-komorkowa/static/js/main.77131c69.js.map",
     "787.10371177.chunk.js.map": "/wieza-komorkowa/static/js/787.10371177.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.423393fe.css",
-    "static/js/main.dac74bc6.js"
+    "static/css/main.11d6acce.css",
+    "static/js/main.77131c69.js"
   ]
 }
