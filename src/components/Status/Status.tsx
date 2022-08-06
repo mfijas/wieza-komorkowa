@@ -1,4 +1,9 @@
-import { checkIfSelectionIsContiguous, getNumberOfSelectedTiles } from '../../puzzle/matrixFunctions';
+import {
+    checkIfPuzzleCompleted,
+    checkIfSelectionIsContiguous,
+    extractSelectedWord,
+    getNumberOfSelectedTiles
+} from '../../puzzle/matrixFunctions';
 import { allWords } from '../../puzzle/words';
 import { TileState } from '../App/tileState';
 import './Status.scss';
@@ -7,12 +12,6 @@ interface StatusParams {
     matrix: string[][];
     tileState: TileState[][];
     markWord: () => void;
-}
-
-export function extractSelectedWord(matrix: string[][], tileStates: TileState[][]) {
-    return tileStates.flatMap((row, y) =>
-        row.map((tile, x) =>
-            tile === 'selected' ? matrix[y][x] : '')).join('');
 }
 
 export function Status({ matrix, tileState, markWord }: StatusParams) {
@@ -27,7 +26,10 @@ export function Status({ matrix, tileState, markWord }: StatusParams) {
 
     let message: string;
     let disabled: boolean;
-    if (getNumberOfSelectedTiles(tileState) === 0) {
+    if (checkIfPuzzleCompleted(tileState)) {
+        message = 'Gratulacje, gotowe!';
+        disabled = true;
+    } else if (getNumberOfSelectedTiles(tileState) === 0) {
         message = 'Zaznacz słowo';
         disabled = true;
     } else if (checkIfSelectionIsContiguous(tileState)) {

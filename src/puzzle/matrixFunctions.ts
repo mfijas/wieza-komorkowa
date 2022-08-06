@@ -75,3 +75,13 @@ export function checkIfSelectionIsContiguous(tileStates: TileState[][]) {
 
     return area.length === numberOfSelectedTiles;
 }
+
+export function extractSelectedWord(matrix: string[][], tileStates: TileState[][]) {
+    return tileStates.flatMap((row, y) =>
+        row.map((tile, x) =>
+            tile === 'selected' ? matrix[y][x] : '')).join('');
+}
+
+export function checkIfPuzzleCompleted(tileState: TileState[][]) {
+    return tileState.every(row => row.every(tile => tile !== 'selected' && tile !== 'unselected'));
+}
