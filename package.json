@@ -1,6 +1,7 @@
 {
   "name": "cell-tower",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "homepage": "https://mfijas.github.io/wieza-komorkowa/",
   "dependencies": {

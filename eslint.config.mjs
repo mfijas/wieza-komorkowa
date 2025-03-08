@@ -18,7 +18,7 @@ export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
-    ignores: ['eslint.config.mjs', 'src/puzzle/words.ts', 'scripts/**/*.*', 'vite.config.ts'],
+    ignores: ['eslint.config.mjs', 'src/puzzle/words.ts', 'scripts/**/*.*', 'vite.config.ts', 'jest.config.js', 'dist/**/*.*']
   },
   ...compat.extends('plugin:react-hooks/recommended'),
   pluginPromise.configs['flat/recommended'],
@@ -46,7 +46,7 @@ export default [
   },
   // Add this block to disable type-aware rules for config files:
   {
-    files: ['eslint.config.mjs'],
+    files: ['eslint.config.mjs', 'jest.config.js'],
     languageOptions: {
       parserOptions: {
         project: null, // Disable type checking explicitly for these files
