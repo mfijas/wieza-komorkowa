@@ -3,7 +3,7 @@ import _ from 'lodash';
 const WIDTH = 8;
 const HEIGHT = 5;
 
-const emptyMatrix: string[][] = new Array(HEIGHT).fill(0).map(() => new Array(WIDTH).fill('_'));
+const emptyMatrix: string[][] = new Array<string[]>(HEIGHT).fill([]).map(() => new Array<string>(WIDTH).fill('_'));
 
 function clone(matrix: string[][]) {
     return matrix.map(a => a.slice());

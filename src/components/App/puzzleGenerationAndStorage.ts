@@ -22,7 +22,7 @@ function getUnusedWordNumbers(tileState: TileState[][]) {
                 row.filter(tile => tile !== 'selected' && tile !== 'unselected')
             )
         )
-    ) as number[];
+    );
 }
 
 export function readPuzzleStateFromLocalStorage() {
