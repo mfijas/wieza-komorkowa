@@ -1,8 +1,9 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
-module.exports = {
-  testEnvironment: "node",
-  transform: {
-    "^.+\.tsx?$": ["ts-jest",{}],
-  },
-  setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"]
+export const testEnvironment = "node";
+export const transform = {
+  "^.+\.tsx?$": ["ts-jest", {}],
+};
+export const setupFilesAfterEnv = ["<rootDir>/src/setupTests.ts"];
+export const moduleNameMapper = {
+  "^lodash-es$": "lodash"
 };

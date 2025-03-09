@@ -6,7 +6,7 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: {
-      crypto: 'empty-module',
+      lodash: 'lodash-es'
     },
   },
   define: {

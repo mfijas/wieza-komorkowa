@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { chunk, shuffle, tail } from 'lodash-es';
 import { resolveMatrix } from './resolveMatrix';
 
 function replaceAt(s: string, index: number, replacement: string) {
@@ -36,7 +36,7 @@ export function fillMatrix(width: number, height: number, words: string[]): { re
     }
 
     function toMatrix(matrix: string): string[][] {
-        return _.chunk(matrix.split(''), width);
+        return chunk(matrix.split(''), width);
     }
 
     function setAt(matrix: string, x: number, y: number, value: string) {
@@ -44,7 +44,7 @@ export function fillMatrix(width: number, height: number, words: string[]): { re
     }
 
     function getAt(matrix: string, x: number, y: number) {
-        return matrix.at(coordsToIndex(width, x, y));
+        return matrix[coordsToIndex(width, x, y)];
     }
 
     function unique(matrices: string[]) {
@@ -87,7 +87,7 @@ export function fillMatrix(width: number, height: number, words: string[]): { re
             );
 
             const filteredOptions =
-                _.shuffle(newOptions
+                shuffle(newOptions
                     .filter(([x, y]) => coordsWithinBounds(x, y) && cellIsEmpty(x, y))
                 );
 
@@ -98,7 +98,7 @@ export function fillMatrix(width: number, height: number, words: string[]): { re
         const [x, y] = findFirstEmptyCell(matrix);
 
         const currentWordLength = wordLengths[0];
-        const remainingWordLengths = _.tail(wordLengths);
+        const remainingWordLengths = tail(wordLengths);
         const matrices = unique(fillWord(matrix, [x, y], currentWordLength));
 
         return matrices.flatMap(matrix => fillMatrix_(matrix, remainingWordLengths, currentWordNumber + 1));
