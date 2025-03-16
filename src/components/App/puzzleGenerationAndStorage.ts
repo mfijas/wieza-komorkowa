@@ -7,7 +7,7 @@ import {
 } from './localStorage';
 import { generatePuzzle } from '../../puzzle/GeneratePuzzle';
 import { emptyTileState, TileState } from './tileState';
-import _ from 'lodash';
+import { difference, uniq } from 'lodash-es';
 
 const NUMBER_OF_WORD_COLOURS = 18;
 
@@ -16,9 +16,9 @@ function getAllWordNumbers() {
 }
 
 function getUnusedWordNumbers(tileState: TileState[][]) {
-    return _.difference(
+    return difference(
         getAllWordNumbers(),
-        _.uniq(tileState.flatMap(row =>
+        uniq(tileState.flatMap(row =>
                 row.filter(tile => tile !== 'selected' && tile !== 'unselected')
             )
         )

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.scss';
-import _ from 'lodash';
+import { head, tail } from 'lodash-es';
 import { set } from '../../puzzle/funtools';
 import { Grid } from '../Grid/Grid';
 import { Status } from '../Status/Status';
@@ -55,8 +55,8 @@ function App(props: AppProps) {
         if (availableWordNumbers.length === 0) {
             throw Error('Ran out of word numbers!');
         }
-        setAvailableWordNumbers(_.tail(availableWordNumbers));
-        return _.head(availableWordNumbers)!;
+        setAvailableWordNumbers(tail(availableWordNumbers));
+        return head(availableWordNumbers)!;
     }
 
     function pushNextWordNumber(nextWordNumber: number) {

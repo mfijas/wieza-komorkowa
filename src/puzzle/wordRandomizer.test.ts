@@ -1,5 +1,5 @@
 import { randomizeWordLengths, randomizeWords } from './wordRandomizer';
-import _ from 'lodash';
+import { sum } from 'lodash-es';
 
 test('randomized numbers should sum up to desired sum', () => {
     // given
@@ -9,7 +9,7 @@ test('randomized numbers should sum up to desired sum', () => {
     const lengths = randomizeWordLengths(totalLength);
 
     // then
-    expect(_.sum(lengths)).toBe(totalLength);
+    expect(sum(lengths)).toBe(totalLength);
 });
 
 test('randomized word lengths should sum up to total length', () => {
@@ -20,5 +20,5 @@ test('randomized word lengths should sum up to total length', () => {
     const words = randomizeWords(totalLength);
 
     // then
-    expect(_.sum(words.map(w => w.length))).toBe(totalLength);
+    expect(sum(words.map(w => w.length))).toBe(totalLength);
 });

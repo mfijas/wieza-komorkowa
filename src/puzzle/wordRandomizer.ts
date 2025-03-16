@@ -1,4 +1,4 @@
-import _, { floor } from 'lodash';
+import { random, floor, memoize } from 'lodash-es';
 import { words } from './words';
 
 const MIN_WORD_LEN = 4;
@@ -8,7 +8,7 @@ export function randomizeWordLengths(totalLength: number) {
     const lengths: number[] = [];
     let lengthSoFar = 0;
     do {
-        const len = _.random(MIN_WORD_LEN, MAX_WORD_LEN);
+        const len = random(MIN_WORD_LEN, MAX_WORD_LEN);
         lengthSoFar += len;
         lengths.push(len);
     } while (totalLength - lengthSoFar > MAX_WORD_LEN * 2);
@@ -19,9 +19,13 @@ export function randomizeWordLengths(totalLength: number) {
     return lengths;
 }
 
+const getWordsOfGivenLength = memoize((length: number) => {
+    return words.filter(w => w.length === length);
+});
+
 function randomizeWord(length: number) {
-    const wordsOfGivenLength = words.filter(w => w.length === length);
-    return wordsOfGivenLength[_.random(wordsOfGivenLength.length - 1)];
+    const wordsOfGivenLength = getWordsOfGivenLength(length);
+    return wordsOfGivenLength[random(wordsOfGivenLength.length - 1)];
 }
 
 export function randomizeWords(totalLength: number) {

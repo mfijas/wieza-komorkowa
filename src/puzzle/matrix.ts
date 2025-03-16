@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { sum, shuffle } from 'lodash-es';
 
 const WIDTH = 8;
 const HEIGHT = 5;
@@ -16,7 +16,7 @@ function findFirstEmptyCell(matrix: string[][]) {
 }
 
 function countEmptyCells(matrix: string[][]) {
-    return _.sum(matrix.map(row => row.filter(cell => cell === '_').length));
+    return sum(matrix.map(row => row.filter(cell => cell === '_').length));
 }
 
 function fillMatrix_(matrix: string[][], wordLen: number, wordNumber: number = 0): string[][][] {
@@ -37,7 +37,7 @@ function fillMatrix_(matrix: string[][], wordLen: number, wordNumber: number = 0
             return [newMatrix];
         }
 
-        const options = _.shuffle([
+        const options = shuffle([
             [x, y - 1],
             [x - 1, y],
             [x + 1, y],
