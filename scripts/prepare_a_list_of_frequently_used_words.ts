@@ -1,11 +1,13 @@
 import * as fs from 'fs';
 
 // generowanie wariantów aspellem:
-// aspell -d pl dump master | aspell -l pl expand > my.dict
+// aspell -d pl dump master | aspell -l pl expand > odm.txt
 
 // lista frekwencyjna
 // https://web.archive.org/web/20091116122442/http://www.open-dictionaries.com/slownikfrleks.pdf
 // http://nlp.pwr.wroc.pl/narzedzia-i-zasoby/zasoby/lista-frekwencyjna
+//
+// (inne do sprawdzenia w przyszłości: https://zasobynauki.pl/zasoby/listy-frekwencyjne-z-korpusow-tekstu,18459/)
 
 function loadWordFrequencies() {
     const data = fs.readFileSync('words_freq.txt', { encoding: 'utf8' });
