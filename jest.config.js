@@ -5,5 +5,6 @@ export const transform = {
 };
 export const setupFilesAfterEnv = ["<rootDir>/src/setupTests.ts"];
 export const moduleNameMapper = {
-  "^lodash-es$": "lodash"
+  "^lodash-es$": "lodash",
+  "\\.(s?css|png|jpg|svg)$": "<rootDir>/src/assetStub.ts"
 };

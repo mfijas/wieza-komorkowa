@@ -100,6 +100,34 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       0 (1 warning, the `set-state-in-effect` item below), 8 suites / 25 tests
       pass, build succeeds.
 
+- [x] **Fixed `react-hooks/set-state-in-effect` in `App.tsx`, and stood up
+      component testing to do it.** The mount effect that seeded four states
+      from localStorage is gone; `App` now holds **one** `puzzleState` object
+      from a lazy `useState` initializer, and a single effect persists it.
+      - `generatePuzzleStateAndStoreInLocalStorage` was split into a
+        side-effect-free `generatePuzzleState` and a `storePuzzleState`, so the
+        initializer does no I/O and storage simply follows state. `newGame` sets
+        one thing instead of four, and `tileState` can no longer be `undefined`,
+        which removed three `!` assertions and the empty-render branch.
+      - **The StrictMode hazard that motivated the design does not exist.** A
+        probe confirms StrictMode invokes a `useState` initializer twice and
+        keeps the *first* result, so a generate-and-store initializer looked
+        like it would leave React on puzzle A and storage on puzzle B. It does
+        not: the second invocation finds what the first one stored and takes the
+        *read* branch. The naive four-lazy-initializer version passes every test
+        here. This change is on ordinary code-quality grounds, not a bug fix.
+      - **Component tests now run** (`App.test.tsx`, 5 tests). Most of the
+        harness was already there and unused — RTL, `jest-dom` and `user-event`
+        were declared devDeps, `setupTests.ts` already imported `jest-dom`, and
+        tsconfig already had `jsx`/`dom`. The gaps were `jest-environment-jsdom`
+        (unbundled since jest 28) and an asset stub, since ts-jest cannot parse
+        `.scss` or `.png` imports. `testEnvironment` stays `node` globally, with
+        a per-file `@jest-environment jsdom` docblock, so the 8 pure-logic
+        puzzle suites are not slowed down.
+      - Verified in the running app, not just under jsdom: fresh generate,
+        reload restore, tile-state persistence and Nowa gra all keep the
+        rendered board and localStorage in agreement.
+
 ## Open
 
 ### Bugs
@@ -108,14 +136,6 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 (see Done above).
 
 ### Enhancements
-
-- [ ] **`react-hooks/set-state-in-effect` in `src/components/App/App.tsx:48`**,
-      surfaced by the react-hooks 7 upgrade and currently set to `'warn'` in
-      `eslint.config.mjs`. The mount effect seeds four states from localStorage.
-      The fix is lazy `useState` initializers, but that also changes when the
-      persist effect at `App.tsx:34` first fires (it would run on mount and
-      write to storage immediately), so it is a behaviour change, not a
-      mechanical edit. Own PR.
 
 - [ ] **Boards above 136 cells need a wider cell encoding.** `generatePuzzle`
       now rejects them rather than hanging, so this is a feature limit, not a

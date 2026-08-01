@@ -30,11 +30,6 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/await-thenable': 'error',
-      // New in eslint-plugin-react-hooks 7. It flags the mount effect in
-      // App.tsx that seeds four states from localStorage. Fixing it means
-      // moving to lazy useState initializers, which changes when the persist
-      // effect first fires — a refactor with its own PR. See TODO.md.
-      'react-hooks/set-state-in-effect': 'warn',
     },
   },
 

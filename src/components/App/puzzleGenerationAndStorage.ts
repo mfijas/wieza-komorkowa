@@ -25,7 +25,14 @@ function getUnusedWordNumbers(tileState: TileState[][]) {
     );
 }
 
-export function readPuzzleStateFromLocalStorage() {
+export interface PuzzleState {
+    matrix: string[][];
+    solution: number[][];
+    tileState: TileState[][];
+    availableWordNumbers: number[];
+}
+
+export function readPuzzleStateFromLocalStorage(): PuzzleState | undefined {
     if (puzzleInLocalStorage()) {
         const { matrix, solution } = readPuzzleFromLocalStorage();
         const tileState = readTileStateFromLocalStorage();
@@ -36,14 +43,20 @@ export function readPuzzleStateFromLocalStorage() {
     }
 }
 
-export function generatePuzzleStateAndStoreInLocalStorage(width: number, height: number) {
+// Deliberately free of storage side effects, so it is safe to call from a
+// `useState` initializer — which StrictMode invokes twice in development.
+// `storePuzzleState` is what persists, driven by the state itself.
+export function generatePuzzleState(width: number, height: number): PuzzleState {
     const { matrix, solution } = generatePuzzle(width, height);
+    return {
+        matrix,
+        solution,
+        tileState: emptyTileState(width, height),
+        availableWordNumbers: getAllWordNumbers()
+    };
+}
+
+export function storePuzzleState({ matrix, solution, tileState }: PuzzleState) {
     storePuzzleInLocalStorage(matrix, solution);
-
-    const tileState = emptyTileState(width, height);
     storeTileStateInLocalStorage(tileState);
-
-    const availableWordNumbers = getAllWordNumbers();
-
-    return { matrix, solution, tileState, availableWordNumbers };
 }

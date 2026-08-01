@@ -39,6 +39,30 @@ explicitly. Do not "clean it up" as an unused dependency.
 Watch for this class of failure generally: if a dependency upgrade breaks module
 resolution, check whether something was relying on a package it never declared.
 
+### Component tests are jsdom per-file, not globally
+
+`testEnvironment` in `jest.config.js` is `"node"`, because the 8 `src/puzzle/`
+suites are pure logic and jsdom only slows them down. Component tests opt in
+with a `@jest-environment jsdom` docblock at the top of the file — see
+`src/components/App/App.test.tsx`.
+
+ts-jest cannot parse `.scss` or `.png`, so asset imports are mapped to
+`src/assetStub.ts` via `moduleNameMapper`. It exports a **string**, not an
+object, because image imports are used as `src` attributes. A new asset
+extension needs adding to that mapping or the suite dies with
+`SyntaxError: Invalid or unexpected token` pointing at a binary file.
+
+`jest-environment-jsdom` is a required devDependency — jest has not bundled it
+since v28.
+
+### A stray worktree under `.claude/worktrees/` breaks lint and doubles the test run
+
+If another session leaves a git worktree there, jest picks up its duplicate
+suites (17 instead of 9) and eslint fails every config-file lint with
+`No tsconfigRootDir was set, and multiple candidate TSConfigRootDirs are
+present`. Local only — CI checks out clean. Check `git worktree list` when
+lint fails on files you did not touch.
+
 ### Deploys are master-only, and there are no branch previews
 
 `.github/workflows/deploy-to-gh-pages.yml` publishes to GitHub Pages. Pages

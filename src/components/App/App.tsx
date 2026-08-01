@@ -4,13 +4,14 @@ import { head, tail } from 'lodash-es';
 import { set } from '../../puzzle/funtools';
 import { Grid } from '../Grid/Grid';
 import { Status } from '../Status/Status';
-import { storeTileStateInLocalStorage } from './localStorage';
 import { TileState } from './tileState';
 import { Header } from '../Header/Header';
 import { Menu } from '../Menu/Menu';
 import {
-    generatePuzzleStateAndStoreInLocalStorage,
-    readPuzzleStateFromLocalStorage
+    generatePuzzleState,
+    PuzzleState,
+    readPuzzleStateFromLocalStorage,
+    storePuzzleState
 } from './puzzleGenerationAndStorage';
 import { Instructions } from '../Instructions/Instructions';
 
@@ -22,34 +23,25 @@ interface AppProps {
 type ActiveScreen = 'game' | 'menu' | 'instructions';
 
 function App(props: AppProps) {
-    const [tileState, setTileState] = useState<TileState[][]>();
+    const [puzzleState, setPuzzleState] = useState<PuzzleState>(() =>
+        readPuzzleStateFromLocalStorage() || generatePuzzleState(props.width, props.height));
 
-    const [availableWordNumbers, setAvailableWordNumbers] = useState<number[]>([]);
-
-    const [matrix, setMatrix] = useState<string[][]>([]);
-    const [solution, setSolution] = useState<number[][]>([]);
+    const { matrix, solution, tileState, availableWordNumbers } = puzzleState;
 
     const [currentScreen, setCurrentScreen] = useState<ActiveScreen>('game');
 
+    // Storage follows state: whatever the board is, that is what gets persisted.
     useEffect(() => {
-        if (tileState !== undefined) {
-            storeTileStateInLocalStorage(tileState);
-        }
-    }, [tileState]);
+        storePuzzleState(puzzleState);
+    }, [puzzleState]);
 
-    useEffect(() => {
-        const {
-            matrix,
-            solution,
-            tileState,
-            availableWordNumbers
-        } = readPuzzleStateFromLocalStorage() || generatePuzzleStateAndStoreInLocalStorage(props.width, props.height);
+    function setTileState(newTileState: TileState[][]) {
+        setPuzzleState(state => ({ ...state, tileState: newTileState }));
+    }
 
-        setMatrix(matrix);
-        setSolution(solution);
-        setTileState(tileState);
-        setAvailableWordNumbers(availableWordNumbers);
-    }, [props.width, props.height]);
+    function setAvailableWordNumbers(newAvailableWordNumbers: number[]) {
+        setPuzzleState(state => ({ ...state, availableWordNumbers: newAvailableWordNumbers }));
+    }
 
     function popNextWordNumber() {
         if (availableWordNumbers.length === 0) {
@@ -65,28 +57,18 @@ function App(props: AppProps) {
 
     function markWord() {
         const nextMarkedWordNumber = popNextWordNumber();
-        const newTileState = tileState!.map(row =>
+        const newTileState = tileState.map(row =>
             row.map(tile =>
                 tile === 'selected' ? nextMarkedWordNumber : tile));
         setTileState(newTileState);
     }
 
     function newGame() {
-        const {
-            matrix,
-            solution,
-            tileState,
-            availableWordNumbers
-        } = generatePuzzleStateAndStoreInLocalStorage(props.width, props.height);
-
-        setMatrix(matrix);
-        setSolution(solution);
-        setTileState(tileState);
-        setAvailableWordNumbers(availableWordNumbers);
+        setPuzzleState(generatePuzzleState(props.width, props.height));
     }
 
     function removeWord(wordNumber: number) {
-        const newTileState = tileState!.map(row =>
+        const newTileState = tileState.map(row =>
             row.map(tile =>
                 tile === wordNumber ? 'unselected' : tile));
         setTileState(newTileState);
@@ -96,37 +78,36 @@ function App(props: AppProps) {
     function renderScreen(currentScreen: ActiveScreen) {
         switch (currentScreen) {
             case 'game':
-                if (tileState) {
-                    return (
-                        <>
-                            <Grid
-                                matrix={matrix}
-                                tileState={tileState}
-                                updateTileState={(x: number, y: number, newState: TileState) =>
-                                    setTileState(tileState => set(tileState!, y, x, newState))}
-                                removeWord={removeWord}
-                            />
-                            <Status
-                                matrix={matrix}
-                                tileState={tileState}
-                                markWord={markWord}
-                                newGame={newGame}
-                            />
-                            <table>
-                                <tbody>
-                                {matrix.map((row, y) =>
-                                    <tr key={'r_' + y}>
-                                        {row.map((cell, x) =>
-                                            <td key={'c_' + y + '_' + x} className={'t' + solution[y][x]}>{cell}</td>
-                                        )}
-                                    </tr>)}
-                                </tbody>
-                            </table>
-                        </>
-                    );
-                } else {
-                    return <></>;
-                }
+                return (
+                    <>
+                        <Grid
+                            matrix={matrix}
+                            tileState={tileState}
+                            updateTileState={(x: number, y: number, newState: TileState) =>
+                                setPuzzleState(state => ({
+                                    ...state,
+                                    tileState: set(state.tileState, y, x, newState)
+                                }))}
+                            removeWord={removeWord}
+                        />
+                        <Status
+                            matrix={matrix}
+                            tileState={tileState}
+                            markWord={markWord}
+                            newGame={newGame}
+                        />
+                        <table>
+                            <tbody>
+                            {matrix.map((row, y) =>
+                                <tr key={'r_' + y}>
+                                    {row.map((cell, x) =>
+                                        <td key={'c_' + y + '_' + x} className={'t' + solution[y][x]}>{cell}</td>
+                                    )}
+                                </tr>)}
+                            </tbody>
+                        </table>
+                    </>
+                );
             case 'menu':
                 return <Menu
                     onNewGame={() => {
