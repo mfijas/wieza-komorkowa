@@ -95,6 +95,12 @@ forced consumer calls `yaml.load()`, present in both majors). Decided: keep.
   risky or wide-reaching edits) gets a branch and a PR. Small, low-risk,
   fully verified changes — docs, a clean dependency bump that needed no code
   or config changes — can go straight to `master`. When in doubt, open a PR.
+- Never wait by sleeping. A foreground `sleep` is blocked by the harness
+  ("Blocked: sleep 60 followed by ..."), and chaining shorter sleeps to get
+  around it is blocked too. To wait on CI, use the tool's own blocking flag —
+  `gh pr checks <n> --watch --interval 15`, `gh run watch <id>` — or a
+  `until <check>; do sleep 2; done` loop. For a long command you started
+  yourself, run it in the background and let it notify you.
 - Dependency work: verify with `npm audit`, `npm run build`, `npm test` and
   `npm run lint` before claiming done. Take majors one at a time — do not
   run parallel upgrades, they contend over `node_modules` and the lockfile.
