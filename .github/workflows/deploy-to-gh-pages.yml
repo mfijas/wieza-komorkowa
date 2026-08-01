@@ -11,14 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install and Build 🔧
-        run: |
-          npm ci
-          npm run build
+      # Pinned rather than inherited from the runner image, which drifts as
+      # GitHub updates it. 24 is inside the engines.node range declared in
+      # package.json (^20.19.0 || ^22.13.0 || >=24) — keep the two in sync.
+      - name: Set up Node ⚙️
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
 
-      # Only master publishes to GitHub Pages. Pull requests run the build
+      - name: Install 📦
+        run: npm ci
+
+      - name: Lint 🧹
+        run: npm run lint
+
+      - name: Test 🧪
+        run: npm test
+
+      - name: Build 🔧
+        run: npm run build
+
+      # Only master publishes to GitHub Pages. Pull requests run the steps
       # above as a verification gate, but must never touch the live site:
       # Pages serves a single site from the gh-pages branch, so any other
       # ref deploying here would overwrite production.

@@ -86,6 +86,20 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       - Also removed the stale CRA `eslintConfig` key (`extends: react-app`)
         from `package.json`. Nothing has read it since the flat config landed.
 
+- [x] **CI pins Node and gates on lint + tests.** Raised by Copilot on PR #6:
+      `.github/workflows/deploy-to-gh-pages.yml` ran only `npm ci && npm run
+      build`, with no `actions/setup-node` at all, so it used whatever Node the
+      `ubuntu-latest` image happened to ship. Added `setup-node@v4` pinned to
+      **24** with `cache: npm` — a single version rather than the `engines.node`
+      range, because that range's `>=24` arm would resolve to whatever is newest
+      at run time, which is the drift being fixed; the comment in the workflow
+      says to keep the two in sync. Split the one combined step into `npm ci` /
+      `npm run lint` / `npm test` / `npm run build` so a failure names itself,
+      and bumped `actions/checkout` v3 → v4 to match the deploy action. The
+      deploy step's master-only guard is untouched. Verified locally: lint exits
+      0 (1 warning, the `set-state-in-effect` item below), 8 suites / 25 tests
+      pass, build succeeds.
+
 ## Open
 
 ### Bugs
@@ -112,17 +126,7 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Build / tooling
 
-- [ ] **CI runs neither lint nor tests, and pins no Node version.**
-      `.github/workflows/deploy-to-gh-pages.yml` runs only `npm ci && npm run
-      build`, with no `actions/setup-node` step at all — it uses whatever Node
-      is preinstalled on `ubuntu-latest`, which drifts as GitHub updates the
-      runner image. Raised by Copilot on PR #6. Two parts, both worth doing
-      together: add `setup-node` pinned to the declared `engines.node` range
-      (with `cache: npm`), and add `npm run lint` and `npm test` as gate steps
-      so the PR check verifies more than that the bundle compiles. Note the
-      engine floor only starts mattering once lint actually runs in CI — the
-      build path does not execute ESLint. `actions/checkout` is still on v3
-      while the deploy action is on v4; bump it in the same pass.
+Nothing open — CI now pins Node and gates on lint + tests (see Done above).
 
 ### Dependencies
 
