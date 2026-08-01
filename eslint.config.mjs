@@ -1,53 +1,54 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import pluginPromise from 'eslint-plugin-promise'
+import reactRefreshPlugin from 'eslint-plugin-react-refresh';
+import pluginPromise from 'eslint-plugin-promise';
 
-export default [
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs', 'src/puzzle/words.ts', 'scripts/**/*.*', 'vite.config.ts', 'jest.config.js', 'dist/**/*.*', 'coverage/**/*.*']
+    // words.ts is generated. dist/ and coverage/ are build output — they must
+    // stay ignored, or the type-aware rules below crash on files that are not
+    // in any tsconfig project.
+    ignores: ['src/puzzle/words.ts', 'dist/**', 'coverage/**'],
   },
-  reactHooksPlugin.configs.flat['recommended-latest'],
-  pluginPromise.configs['flat/recommended'],
+
+  // The app: full type-aware linting.
   {
     files: ['src/**/*.{ts,tsx}'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+      pluginPromise.configs['flat/recommended'],
+      reactHooksPlugin.configs.flat['recommended-latest'],
+      reactRefreshPlugin.configs.vite,
+    ],
     languageOptions: {
-      parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json',
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      '@typescript-eslint': tseslint.plugin,
-      'react-hooks': reactHooksPlugin,
-    },
     rules: {
       '@typescript-eslint/await-thenable': 'error',
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
       // New in eslint-plugin-react-hooks 7. It flags the mount effect in
       // App.tsx that seeds four states from localStorage. Fixing it means
       // moving to lazy useState initializers, which changes when the persist
       // effect first fires — a refactor with its own PR. See TODO.md.
       'react-hooks/set-state-in-effect': 'warn',
     },
-    settings: {
-      react: { version: 'detect' },
-    },
   },
-  // Add this block to disable type-aware rules for config files:
+
+  // Build scripts and config files. These are outside tsconfig.json's project,
+  // so type-aware rules would crash on them — they get the syntactic rules
+  // only. Keeping them linted at all is the point; see TODO.md.
   {
-    files: ['eslint.config.mjs', 'jest.config.js'],
+    files: ['scripts/**/*.ts', 'vite.config.ts', 'jest.config.js', 'eslint.config.mjs'],
+    extends: [eslint.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       parserOptions: {
-        project: null, // Disable type checking explicitly for these files
+        project: false,
+        projectService: false,
       },
     },
-    rules: {
-      '@typescript-eslint/*': 'off'
-    },
   },
-];
+);

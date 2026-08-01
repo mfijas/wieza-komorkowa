@@ -21,15 +21,6 @@ function loadWordFrequencies() {
     });
 }
 
-function loadAspellDump() {
-    const data = fs.readFileSync('aspell_dump.txt', { encoding: 'utf8' });
-    const lines = data.split('\n');
-    return lines.map(line => {
-        const [word] = line.split('/');
-        return { word, line };
-    });
-}
-
 function loadOdm() {
     const data = fs.readFileSync('odm.txt', { encoding: 'utf8' });
     const lines = data.split('\r\n');

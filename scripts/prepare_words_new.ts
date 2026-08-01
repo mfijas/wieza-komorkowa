@@ -28,17 +28,6 @@ function loadWordFrequencies(filename: string) {
     });
 }
 
-function loadOdm() {
-    const data = readFileSync('odm.txt', { encoding: 'utf8' });
-    const lines = data.split('\r\n');
-    return lines.map(line => {
-        const words = line.split(', ');
-        const root = words[0];
-        const derived = words.slice(1);
-        return { root, derived };
-    });
-}
-
 function expandWords(words: string[]): Promise<string[]> {
     return new Promise((resolve, reject) => {
         // Join words with newlines to pass as stdin
