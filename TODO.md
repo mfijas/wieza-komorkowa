@@ -168,9 +168,28 @@ Nothing open — CI now pins Node and gates on lint + tests (see Done above).
 ### Dependencies
 
 - [ ] **Major upgrades, each worth its own PR** (deliberately excluded from #2):
-  - [ ] `@vitejs/plugin-react` 4 → 6 — **blocked on the vite hold, not independent.**
-        6.x peer-requires `vite: ^8.0.0`, so it cannot land while vite stays on 6.
-        Do it together with vite 6 → 8 or not at all.
+  - [x] `vite` 6 → 8 **+ `@vitejs/plugin-react` 4 → 6, landed together** — they
+        had to be, since plugin-react 6 peer-requires `vite: ^8.0.0`. No source
+        or config changes at all: `vite.config.ts` is untouched, and the
+        `resolve.alias` / `define` blocks still work as-is. Notes:
+        - **`npm install` of the pair fails on a peer conflict against the
+          existing tree** — plugin-react 6 has an *optional* peer on
+          `@rolldown/plugin-babel`, which drags `@babel/core@8` against the
+          `@babel/core@7` that plugin-react 4 had pinned. `--force` /
+          `--legacy-peer-deps` are not needed: bump both versions in
+          `package.json` by hand, delete `node_modules` + `package-lock.json`,
+          and plain `npm install` resolves cleanly. Do that before reaching for
+          an override.
+        - **vite 8 builds on rolldown**, so build output and warning text
+          differ. The >500 kB chunk warning now suggests
+          `build.rolldownOptions.output.codeSplitting` where it used to name
+          rollup options — cosmetic here, since the warning was already present
+          and is still unaddressed.
+        - `engines.node` (`^20.19.0 || ^22.13.0 || >=24`) already satisfies
+          vite 8's `^20.19.0 || >=22.12.0`; CI's pinned Node 24 is fine.
+        - Verified: `npm audit` 0 vulnerabilities, `npm run build` succeeds,
+          9 suites / 32 tests pass, `npm run lint` exits 0 clean, and the dev
+          server renders the board with no console errors.
   - [x] `jest` 29 → 30 + `@types/jest` 30 — done. No matching `ts-jest` major
         needed: `ts-jest@29.4.12` already declares `jest: ^29 || ^30`, so it
         stays on 29. No config or test changes at all — `jest.config.js` was
@@ -197,7 +216,6 @@ Nothing open — CI now pins Node and gates on lint + tests (see Done above).
         ESLint 10 range, which is the tightest among direct deps and satisfies
         `sass` (>=20.19), `vite` and `jest`. npm does not enforce this without
         `engine-strict`, so it documents and warns rather than protects.
-  - [ ] `vite` 6 → 8 — on hold, two majors, no reason to churn
   - [ ] `typescript` 5.8 → 7 — on hold, deliberate project not a dep bump
 
 - [ ] **Configure Dependabot for the `npm` ecosystem.** `.github/dependabot.yml`
@@ -207,8 +225,8 @@ Nothing open — CI now pins Node and gates on lint + tests (see Done above).
       one at a time, so an unscoped npm entry would open a pile of PRs that
       contend over `node_modules` and the lockfile. Decide on a scope that does
       not fight that — security-only updates, or patch/minor grouped into a
-      single PR with `ignore` entries for the held majors (`vite`,
-      `@vitejs/plugin-react`, `typescript`). Note Dependabot only reads its
+      single PR with `ignore` entries for the held majors (now just
+      `typescript`; vite and `@vitejs/plugin-react` have landed). Note Dependabot only reads its
       config from the default branch.
 
 - [ ] **Watch for more phantom dependencies.** `jest.config.js:8` maps
