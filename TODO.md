@@ -163,6 +163,17 @@ Nothing open — CI now pins Node and gates on lint + tests (see Done above).
   - [ ] `vite` 6 → 8 — on hold, two majors, no reason to churn
   - [ ] `typescript` 5.8 → 7 — on hold, deliberate project not a dep bump
 
+- [ ] **Configure Dependabot for the `npm` ecosystem.** `.github/dependabot.yml`
+      currently covers `github-actions` only (added when checkout/setup-node had
+      drifted two majors behind and surfaced as a Node 20 deprecation warning).
+      npm was left out on purpose: the majors above are on hold and meant to land
+      one at a time, so an unscoped npm entry would open a pile of PRs that
+      contend over `node_modules` and the lockfile. Decide on a scope that does
+      not fight that — security-only updates, or patch/minor grouped into a
+      single PR with `ignore` entries for the held majors (`vite`,
+      `@vitejs/plugin-react`, `typescript`). Note Dependabot only reads its
+      config from the default branch.
+
 - [ ] **Watch for more phantom dependencies.** `jest.config.js:8` maps
       `lodash-es` → `lodash`, but `lodash` was never declared — it was only
       present as a transitive of the old eslint tree, and `npm update` pruning
