@@ -15,10 +15,13 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    // TS 6 requires this to be explicit (TS5011) whenever something actually
+    // emits — ts-jest does, even though `tsc` here never does.
+    "rootDir": "./src",
     "jsx": "react-jsx"
   },
   "include": ["src"]

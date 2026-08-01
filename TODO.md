@@ -163,7 +163,19 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Build / tooling
 
-Nothing open — CI now pins Node and gates on lint + tests (see Done above).
+- [ ] **Add a `typecheck` script and gate CI on it.** Nothing in this repo
+      runs `tsc`. `npm run build` is `vite build`, which transpiles without
+      typechecking; `npm test` typechecks only what the suites import, through
+      ts-jest; lint's type-aware rules are not a substitute for a full check.
+      So a type error in an unimported module reaches `master` uncaught, and
+      the declared `typescript` version barely affects any command we run.
+      Add `"typecheck": "tsc --noEmit"` and a step for it in
+      `.github/workflows/deploy-to-gh-pages.yml`, alongside the existing
+      `npm run lint` / `npm test` / `npm run build` steps. It passes clean
+      today (verified on the TS 6 bump), so this should land green.
+
+      **Do this before revisiting TypeScript 7**, so that upgrade has a
+      measurable effect to verify rather than being invisible to CI.
 
 ### Dependencies
 
@@ -216,7 +228,44 @@ Nothing open — CI now pins Node and gates on lint + tests (see Done above).
         ESLint 10 range, which is the tightest among direct deps and satisfies
         `sass` (>=20.19), `vite` and `jest`. npm does not enforce this without
         `engine-strict`, so it documents and warns rather than protects.
-  - [ ] `typescript` 5.8 → 7 — on hold, deliberate project not a dep bump
+  - [x] `typescript` 5.8 → **6.0.3** — landed. This is the prescribed first half
+        of the 5.x → 7 migration, and the whole of what is currently possible.
+        - **TS 7 is the Go port, and 7.0 ships no JavaScript compiler API.**
+          `typescript@7`'s `.` export is `lib/version.cjs`, which exports
+          `version` and `versionMajorMinor` and nothing else — there is no
+          `createProgram`, no `transpileModule`. Verified by installing it:
+          `npm install` fails outright on `@typescript-eslint/parser`'s peer
+          (`>=4.8.4 <6.1.0`) against a **clean** tree — not the stale-tree noise
+          described in the vite entry above — and forcing it through with
+          `--legacy-peer-deps` fails all 9 suites with *"The TypeScript compiler
+          "typescript" (version 7.0.2) does not expose the JavaScript compiler
+          API required by ts-jest."* Microsoft expects the new API in **7.1**;
+          `@typescript/typescript6` (6.0.2) is the compat package tooling is
+          meant to sit on until then. Both of this project's TS consumers —
+          `ts-jest` (peer `>=4.3 <7`) and `typescript-eslint` (peer `<6.1.0`) —
+          are on the JS API, so TS 7 is blocked on both of them shipping support.
+        - **TS 7 would currently buy this project nothing at the command line
+          anyway.** Nothing runs `tsc`: `npm run build` is `vite build`, which
+          transpiles without typechecking, and there is no `typecheck` script.
+          The TS version only reaches the editor's language server and, through
+          the JS API, ts-jest and the type-aware lint rules. The 10x native
+          compiler has nothing here to be 10x on. Filed as an open item under
+          **Build / tooling** above: add a `typecheck` script and gate CI on it
+          *before* revisiting 7.
+        - **Two tsconfig changes were required**, both flagged by TS 6 as
+          deprecation errors — which is the point of the 6.x staging step:
+          `moduleResolution` `"node"` (node10) is removed in 7 and is now
+          `"bundler"`, correct for a Vite project and compatible with the
+          existing `module: "esnext"`; and `rootDir` must now be explicit
+          (TS5011) for anything that emits. `tsc --noEmit` did not surface the
+          second one — **ts-jest did**, by failing all 9 suites, so run the
+          tests and not just `tsc` when validating a TS bump.
+        - `strict: true` is already explicit here, so TS 7 turning it on by
+          default is a no-op for this repo.
+        - Verified: `npx tsc --noEmit` clean, 9 suites / 32 tests pass,
+          `npm run lint` exits 0, `npm run build` succeeds, `npm audit` 0.
+  - [ ] `typescript` 6 → 7 — blocked until `ts-jest` and `typescript-eslint`
+        support the 7.1 API. See above.
 
 - [ ] **Configure Dependabot for the `npm` ecosystem.** `.github/dependabot.yml`
       currently covers `github-actions` only (added when checkout/setup-node had
