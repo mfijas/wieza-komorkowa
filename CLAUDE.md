@@ -8,8 +8,9 @@ word game. React 19 + TypeScript, built with Vite, tested with Jest via ts-jest.
 ```bash
 npm run dev      # vite dev server
 npm run build    # production build into dist/
-npm test         # jest, 8 suites
+npm test         # jest, 9 suites
 npm run lint     # eslint (flat config)
+npm run typecheck # tsc --noEmit; src/ only, nothing else runs tsc
 ```
 
 ## Layout
@@ -154,9 +155,11 @@ explicit `rootDir` were found. Note that `tsc --noEmit` does **not** report the
 `rootDir` one — only something that emits does, i.e. ts-jest. Validate a TS bump
 with `npm test`, not just `tsc`.
 
-Nothing in this repo runs `tsc` in CI (`npm run build` is `vite build`, which
-does not typecheck), so the TS version only affects the editor, ts-jest and the
-type-aware lint rules.
+`npm run typecheck` (`tsc --noEmit`) now runs in CI, so a TS bump does affect a
+command we gate on — but only over `src/`, per `tsconfig.json`'s `include`.
+Beyond that the TS version reaches the editor, ts-jest and the type-aware lint
+rules. `npm run build` is still `vite build`, which transpiles without
+typechecking.
 
 ### The `js-yaml` override is deliberate
 

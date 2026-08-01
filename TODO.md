@@ -145,6 +145,30 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
         reload restore, tile-state persistence and Nowa gra all keep the
         rendered board and localStorage in agreement.
 
+- [x] **Added a `typecheck` script and gated CI on it.** `"typecheck": "tsc
+      --noEmit"` in `package.json`, and a `Typecheck 🔍` step in
+      `.github/workflows/deploy-to-gh-pages.yml` placed **before** lint — it is
+      the fastest of the four and the one whose failures are most localised, so
+      it should be what a broken PR reports first. Landed green, as predicted on
+      the TS 6 bump: `tsc --noEmit` is clean, 9 suites / 32 tests pass, lint
+      exits 0, build succeeds.
+      - **The gate covers `src/` only.** `tsconfig.json` has `include: ["src"]`,
+        so `scripts/**`, `vite.config.ts` and `jest.config.js` are still
+        untypechecked — the same project boundary that forces eslint's two-block
+        split. Widening it is not free: those files would need the `rootDir` and
+        type-aware setup that keeping them out currently avoids. Left as is; the
+        uncovered files are one-off scripts and config, not app code.
+      - This is now the one command whose behaviour a TypeScript major actually
+        changes at the command line, which was the point of doing it first.
+        Note TS 7 would **not** be blocked here — its `tsc` binary is the Go
+        port and runs fine; the blockers remain `ts-jest` and `typescript-eslint`
+        needing the 7.1 JS API.
+      - **Found while verifying: `npm test` does not work from inside a
+        `.claude/worktrees/` checkout.** Jest's ignore patterns match absolute
+        paths, so a worktree excludes its own suites and exits 1 with
+        `No tests found`, pointing at the directory rather than the config.
+        Documented in `CLAUDE.md` with the override flags. CI is unaffected.
+
 ## Open
 
 ### Bugs
@@ -163,19 +187,7 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Build / tooling
 
-- [ ] **Add a `typecheck` script and gate CI on it.** Nothing in this repo
-      runs `tsc`. `npm run build` is `vite build`, which transpiles without
-      typechecking; `npm test` typechecks only what the suites import, through
-      ts-jest; lint's type-aware rules are not a substitute for a full check.
-      So a type error in an unimported module reaches `master` uncaught, and
-      the declared `typescript` version barely affects any command we run.
-      Add `"typecheck": "tsc --noEmit"` and a step for it in
-      `.github/workflows/deploy-to-gh-pages.yml`, alongside the existing
-      `npm run lint` / `npm test` / `npm run build` steps. It passes clean
-      today (verified on the TS 6 bump), so this should land green.
-
-      **Do this before revisiting TypeScript 7**, so that upgrade has a
-      measurable effect to verify rather than being invisible to CI.
+Nothing open — the typecheck script and its CI gate have landed (see Done).
 
 ### Dependencies
 
