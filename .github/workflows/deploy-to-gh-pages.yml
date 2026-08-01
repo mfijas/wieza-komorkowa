@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       # Pinned rather than inherited from the runner image, which drifts as
       # GitHub updates it. 24 is inside the engines.node range declared in
       # package.json (^20.19.0 || ^22.13.0 || >=24) — keep the two in sync.
       - name: Set up Node ⚙️
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
