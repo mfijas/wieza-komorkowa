@@ -72,18 +72,15 @@ Three separate exclusions are needed, because none of these tools reads
 - `.claude/**` in the `ignores` block of `eslint.config.mjs`
 - `.claude/worktrees/` in `.gitignore`
 
-**The flip side: `npm test` finds nothing when run from inside a worktree.**
-The ignore patterns are matched against absolute paths, and a worktree's own
-path contains `/.claude/worktrees/`, so every suite in it is excluded — jest
-exits 1 with `No tests found` and blames the directory, not the config. To
-verify a change from within a worktree, override both patterns:
-
-```bash
-npx jest --testPathIgnorePatterns /node_modules/ --modulePathIgnorePatterns /nonexistent-dir/
-```
-
-(`--modulePathIgnorePatterns` needs a value; an empty one is a CLI parse error.)
-CI is unaffected — it checks out clean, with no `.claude/worktrees` in the path.
+**Jest's two patterns must stay anchored to `<rootDir>`.** They are matched
+against *absolute* paths, so a bare `"/.claude/"` also matches the **ancestor**
+path of a worktree — and `npm test` run inside one then excluded its own suites
+and exited 1 with `No tests found`, blaming the directory rather than the
+config. `<rootDir>/.claude/` scopes each pattern to the checkout jest is
+actually running in, which keeps a *nested* worktree excluded (the reason the
+patterns exist) while leaving a worktree's own suites runnable. Verified both
+ways: 9 suites from inside a worktree, and still 9 — not 18 — with a nested one
+present. Do not "simplify" the `<rootDir>` prefix away.
 
 Do not drop any of them. If lint or tests start behaving oddly anyway, check
 `git worktree list` — a worktree can still hold commits that exist nowhere

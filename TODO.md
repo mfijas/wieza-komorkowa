@@ -163,11 +163,15 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
         Note TS 7 would **not** be blocked here — its `tsc` binary is the Go
         port and runs fine; the blockers remain `ts-jest` and `typescript-eslint`
         needing the 7.1 JS API.
-      - **Found while verifying: `npm test` does not work from inside a
-        `.claude/worktrees/` checkout.** Jest's ignore patterns match absolute
-        paths, so a worktree excludes its own suites and exits 1 with
-        `No tests found`, pointing at the directory rather than the config.
-        Documented in `CLAUDE.md` with the override flags. CI is unaffected.
+      - **Found while verifying, and fixed: `npm test` found no suites from
+        inside a `.claude/worktrees/` checkout.** Jest's ignore patterns match
+        absolute paths, so a bare `"/.claude/"` matched the worktree's own
+        ancestor path and excluded its suites — exit 1, `No tests found`,
+        pointing at the directory rather than the config. Anchoring both
+        patterns to `<rootDir>` fixes it without weakening them: a nested
+        worktree is still excluded, which is the only thing they were ever for.
+        Verified both directions (9 suites inside a worktree; still 9, not 18,
+        with a nested one present). CI was never affected — it checks out clean.
 
 ## Open
 
