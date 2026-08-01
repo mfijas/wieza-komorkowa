@@ -1,18 +1,7 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import { FlatCompat } from '@eslint/eslintrc';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import pluginPromise from 'eslint-plugin-promise'
-
-// mimic CommonJS variables -- not needed if using CommonJS
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
 
 export default [
   eslint.configs.recommended,
@@ -20,7 +9,7 @@ export default [
   {
     ignores: ['eslint.config.mjs', 'src/puzzle/words.ts', 'scripts/**/*.*', 'vite.config.ts', 'jest.config.js', 'dist/**/*.*', 'coverage/**/*.*']
   },
-  ...compat.extends('plugin:react-hooks/recommended'),
+  reactHooksPlugin.configs.flat['recommended-latest'],
   pluginPromise.configs['flat/recommended'],
   {
     files: ['src/**/*.{ts,tsx}'],
@@ -39,6 +28,11 @@ export default [
       '@typescript-eslint/await-thenable': 'error',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      // New in eslint-plugin-react-hooks 7. It flags the mount effect in
+      // App.tsx that seeds four states from localStorage. Fixing it means
+      // moving to lazy useState initializers, which changes when the persist
+      // effect first fires — a refactor with its own PR. See TODO.md.
+      'react-hooks/set-state-in-effect': 'warn',
     },
     settings: {
       react: { version: 'detect' },

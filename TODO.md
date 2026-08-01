@@ -49,6 +49,14 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Enhancements
 
+- [ ] **`react-hooks/set-state-in-effect` in `src/components/App/App.tsx:48`**,
+      surfaced by the react-hooks 7 upgrade and currently set to `'warn'` in
+      `eslint.config.mjs`. The mount effect seeds four states from localStorage.
+      The fix is lazy `useState` initializers, but that also changes when the
+      persist effect at `App.tsx:34` first fires (it would run on mount and
+      write to storage immediately), so it is a behaviour change, not a
+      mechanical edit. Own PR.
+
 - [ ] **Boards above 136 cells need a wider cell encoding.** `generatePuzzle`
       now rejects them rather than hanging, so this is a feature limit, not a
       bug. Lifting it means giving up one-character cells — the matrix is a
@@ -58,7 +66,52 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Build / tooling
 
-Nothing open — `npm run lint` now exits clean (see Done above).
+- [ ] **Review the lint configuration as a whole.** `eslint.config.mjs` has
+      accumulated cruft and unexamined choices; the eslint 10 upgrade (#6)
+      surfaced several. Worth one deliberate pass rather than piecemeal edits:
+  - [ ] **Decide whether to actually adopt React linting.** `eslint-plugin-react`
+        and `@eslint-react/eslint-plugin` were both declared as devDependencies
+        but never referenced by the flat config, and #6 removed them rather than
+        carrying dead weight. The question they raise is still open and is a
+        real one: today the only React rules in force come from
+        `eslint-plugin-react-hooks`. If we want JSX/component rules, pick **one**
+        of the two (they overlap heavily — `eslint-plugin-react` is the classic,
+        `@eslint-react` the TS-first rewrite), add it to the config, and budget
+        for the findings. If we don't, they stay out.
+  - [ ] **The last config block is dead.** It targets `eslint.config.mjs` and
+        `jest.config.js` to turn off type-aware rules, but both files are in the
+        `ignores` list above, so it never applies to anything. Its rule entry
+        `'@typescript-eslint/*': 'off'` would not work regardless — ESLint has no
+        wildcard rule names, so that is not "disable the namespace", it is an
+        unknown rule that only escapes an error because the block is unreachable.
+        Delete it, or stop ignoring those files and write it correctly.
+  - [ ] **Two more unused devDependencies:** `@eslint/compat` and
+        `eslint-plugin-only-warn`. Neither is imported by the config. Left in
+        place during #6 because, unlike the React plugins, they were not blocking
+        anything — but they should be dropped or actually used. `only-warn` in
+        particular is a real decision: it downgrades every rule to a warning,
+        which would change what a CI lint gate means.
+  - [ ] **A lot is simply not linted:** `scripts/**`, `vite.config.ts`,
+        `jest.config.js`, `eslint.config.mjs` and `src/puzzle/words.ts` are all
+        ignored. `words.ts` is generated and obviously fine to skip, but the
+        config files and `scripts/` are hand-written code that currently gets no
+        checking at all. `scripts/` is excluded from the tsconfig project, which
+        is why type-aware rules would crash on it — fixing that means either a
+        second tsconfig or a non-type-aware config block for those paths.
+  - [ ] **`settings: { react: { version: 'detect' } }` is inert** now that no
+        plugin reads it. Remove it, or it becomes misleading.
+
+- [ ] **CI runs neither lint nor tests, and pins no Node version.**
+      `.github/workflows/deploy-to-gh-pages.yml` runs only `npm ci && npm run
+      build`, with no `actions/setup-node` step at all — it uses whatever Node
+      is preinstalled on `ubuntu-latest`, which drifts as GitHub updates the
+      runner image. Raised by Copilot on PR #6. Two parts, both worth doing
+      together: add `setup-node` pinned to the declared `engines.node` range
+      (with `cache: npm`), and add `npm run lint` and `npm test` as gate steps
+      so the PR check verifies more than that the bundle compiles. Note the
+      engine floor only starts mattering once lint actually runs in CI — the
+      build path does not execute ESLint. `actions/checkout` is still on v3
+      while the deploy action is on v4; bump it in the same pass.
 
 ### Dependencies
 
@@ -71,9 +124,27 @@ Nothing open — `npm run lint` now exits clean (see Done above).
         stays on 29. No config or test changes at all — `jest.config.js` was
         untouched and all 8 suites (25 tests) passed first try, along with
         build, lint and `npm audit`.
-  - [ ] `eslint` 9 → 10, `@eslint/js` 10, `@eslint-react/eslint-plugin` 1 → 5,
-        `eslint-plugin-react-hooks` 5 → 7 (lint-only, cannot break the build, but
-        will surface many new findings — do after the lint fix above)
+  - [x] `eslint` 9 → 10, `@eslint/js` 10, `eslint-plugin-react-hooks` 5 → 7 —
+        done, plus `@eslint/compat` 1 → 2 and
+        `eslint-plugin-promise` 7.2 → 7.3 (both needed for the eslint 10 peer).
+        Two config changes were required. First, `eslint.config.mjs` imported
+        `FlatCompat` from `@eslint/eslintrc` — an **undeclared phantom dep**, and
+        eslint 10 drops eslintrc entirely. It was only bridging
+        `plugin:react-hooks/recommended`, so it is gone in favour of the plugin's
+        own flat config. Second, react-hooks 7 moved the flat config: `configs
+        .recommended` and `configs['recommended-latest']` are both still the
+        eslintrc array form, the flat one is `configs.flat['recommended-latest']`.
+        Removed **two unused plugins** rather than upgrading dead weight:
+        `eslint-plugin-react` (nothing in the flat config references it, and it
+        was the hard blocker — no release peers eslint 10) and
+        `@eslint-react/eslint-plugin` (also unreferenced; it was the sole source
+        of a `>=22.0.0` Node floor). Neither is needed to run lint in CI; the
+        config imports neither. Re-adding either would be a deliberate "we want
+        React-specific rules" decision, not a prerequisite for anything.
+        `engines.node` is now declared as `^20.19.0 || ^22.13.0 || >=24` — the
+        ESLint 10 range, which is the tightest among direct deps and satisfies
+        `sass` (>=20.19), `vite` and `jest`. npm does not enforce this without
+        `engine-strict`, so it documents and warns rather than protects.
   - [ ] `vite` 6 → 8 — on hold, two majors, no reason to churn
   - [ ] `typescript` 5.8 → 7 — on hold, deliberate project not a dep bump
 

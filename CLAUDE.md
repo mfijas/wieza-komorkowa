@@ -51,6 +51,19 @@ were silently overwriting the live site. It is now restricted to `master`, with
 you add triggers, the deploy step must stay guarded on
 `github.event_name == 'push' && github.ref == 'refs/heads/master'`.
 
+### `eslint-plugin-react-hooks` hides its flat config one level down
+
+In v7, both `configs.recommended` and `configs['recommended-latest']` are still
+the **eslintrc** array form (`plugins: ['react-hooks']`). The flat config is
+`configs.flat['recommended-latest']`. Passing either of the first two to a flat
+config fails with "plugins key defined as an array of strings", which reads like
+a config bug rather than a wrong import path.
+
+Related: `eslint.config.mjs` used to import `FlatCompat` from `@eslint/eslintrc`
+without declaring it — another phantom dep, and eslint 10 removed eslintrc
+support outright. Do not reintroduce the eslintrc bridge; use plugins' own flat
+configs.
+
 ### Generated output must stay out of ESLint
 
 `recommendedTypeChecked` applies type-aware rules globally, so any JS outside
