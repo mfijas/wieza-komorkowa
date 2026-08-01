@@ -17,19 +17,30 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       the crash had been masking, in a `GeneratePuzzle.test.ts` smoke test
       that asserted nothing; gave it real assertions. Lint now exits 0.
 - [x] Add `CLAUDE.md` so future sessions start informed — PR #4.
+- [x] Fix the base-parsing bug in `src/puzzle/resolveMatrix.ts:6`. Confirmed
+      real: `puzzleGeneration.ts` encodes cells with `n.toString(32)` and
+      decodes elsewhere with `parseInt(c, 32)`, so the `parseInt(currentCell, 30)`
+      in `resolveMatrix` was the lone outlier — base 32 is the intended
+      alphabet. Words 30 (`'u'`) and 31 (`'v'`) are invalid in base 30 and
+      parsed to `NaN`, so `words[NaN]` was `undefined` and the resolve threw.
+      Latent only: unreachable at the live 7×12 board. Changed 30 → 32 and
+      added a regression test to `resolveMatrix.test.ts` that fails against the
+      bug. Deleted `baseParsingBug.test.ts` — it asserted the buggy behavior
+      (`expect(...).toThrow()`), so it locked the bug in and would have failed
+      against the fix.
 
 ## Open
 
 ### Bugs
 
-- [ ] **Base-parsing bug in `src/puzzle/resolveMatrix.ts:6`.**
-      `src/puzzle/baseParsingBug.test.ts` (untracked, currently passing) asserts
-      the parse should use base 32, not base 30 — i.e. `parseInt(currentCell, 30)`
-      → `parseInt(currentCell, 32)`. State of this work is unclear; the test
-      documents the fix via `console.log` rather than failing on it, so it is
-      characterizing current behavior rather than driving a fix. Needs a look at
-      what the intended alphabet size actually is before changing anything, and
-      the test should be made to fail against the bug (and be committed) first.
+- [ ] **Single-char cell limit caps puzzles at 32 words.** `numberToChar` in
+      `src/puzzle/puzzleGeneration.ts:18` returns `n.toString(32)`, which is two
+      characters from 32 upward (`'10'`). Matrix cells are single characters, so
+      `setAt`/`replaceAt` would corrupt the matrix rather than throw. Not
+      reachable at the live 7×12 board (84 cells / min word length 4 = 21 words
+      max), and not reachable at any board under 128 cells. Fix by widening the
+      cell encoding (or asserting the word count) if larger boards are ever
+      wanted — see the base-parsing fix below for the encode/decode contract.
 
 ### Build / tooling
 
