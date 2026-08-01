@@ -106,7 +106,8 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       from a lazy `useState` initializer, and a single effect persists it.
       - `generatePuzzleStateAndStoreInLocalStorage` was split into a
         side-effect-free `generatePuzzleState` and a `storePuzzleState`, so the
-        initializer does no I/O and storage simply follows state. `newGame` sets
+        initializer only ever *reads* storage — every write now happens in the
+        persist effect, and storage simply follows state. `newGame` sets
         one thing instead of four, and `tileState` can no longer be `undefined`,
         which removed three `!` assertions and the empty-render branch.
       - **The StrictMode hazard that motivated the design does not exist.** A
@@ -124,6 +125,13 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
         `.scss` or `.png` imports. `testEnvironment` stays `node` globally, with
         a per-file `@jest-environment jsdom` docblock, so the 8 pure-logic
         puzzle suites are not slowed down.
+      - **Corrupt localStorage no longer crashes the app.** Raised in review:
+        the two storage keys are written separately and can go out of step, and
+        `readPuzzleStateFromLocalStorage` threw `SyntaxError: Unexpected end of
+        JSON input` on a puzzle with a missing tile state. Reproduced with a
+        failing test before fixing. Pre-existing, but this refactor moved the
+        read into render, where a throw takes the whole app down instead of one
+        effect. Anything unusable now falls back to a fresh puzzle.
       - Verified in the running app, not just under jsdom: fresh generate,
         reload restore, tile-state persistence and Nowa gra all keep the
         rendered board and localStorage in agreement.

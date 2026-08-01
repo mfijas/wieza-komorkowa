@@ -8,7 +8,7 @@ interface HeaderProps {
 export function Header(props: HeaderProps) {
     return (
         <div className="header">
-            <button onClick={() => props.onClick()}>
+            <button onClick={() => props.onClick()} aria-label="Menu">
                 <FaBars/>
             </button>
             <div className="title">Wieża komórkowa</div>

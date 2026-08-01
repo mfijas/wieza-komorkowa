@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { StrictMode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { emptyTileState } from './tileState';
@@ -65,7 +65,7 @@ describe('App', () => {
         const firstBoard = renderedBoard();
         const storedAfterFirstRender = localStorage.getItem('puzzle');
 
-        cleanupAndRerender();
+        remount();
 
         expect(renderedBoard()).toEqual(firstBoard);
         expect(localStorage.getItem('puzzle')).toEqual(storedAfterFirstRender);
@@ -77,9 +77,31 @@ describe('App', () => {
         markedTileState[0][0] = 1;
         localStorage.setItem('solution', JSON.stringify(markedTileState));
 
-        cleanupAndRerender();
+        remount();
 
         expect(document.querySelectorAll('#grid button')[0]).toHaveClass('t1');
+    });
+
+    // The two storage keys are written separately and can go out of step. This
+    // used to throw `SyntaxError: Unexpected end of JSON input` during render,
+    // taking the whole app down; a fresh puzzle is the right fallback.
+    it('starts a fresh puzzle when the stored tile state is unusable', () => {
+        renderApp();
+        localStorage.removeItem('solution');
+
+        remount();
+
+        expect(document.querySelectorAll('#grid button')).toHaveLength(WIDTH * HEIGHT);
+        expect(storedBoard()).toEqual(renderedBoard());
+    });
+
+    it('starts a fresh puzzle when the stored puzzle itself is corrupt', () => {
+        localStorage.setItem('puzzle', 'not json');
+
+        renderApp();
+
+        expect(document.querySelectorAll('#grid button')).toHaveLength(WIDTH * HEIGHT);
+        expect(storedBoard()).toEqual(renderedBoard());
     });
 
     // `delay: null` drops userEvent's artificial pause between events, which is
@@ -89,7 +111,7 @@ describe('App', () => {
         renderApp();
         const firstBoard = renderedBoard();
 
-        await user.click(screen.getByRole('button', { name: '' }));
+        await user.click(screen.getByRole('button', { name: 'Menu' }));
         await user.click(screen.getByText('Nowa gra'));
 
         expect(renderedBoard()).not.toEqual(firstBoard);
@@ -97,7 +119,10 @@ describe('App', () => {
     });
 });
 
-function cleanupAndRerender() {
-    document.body.innerHTML = '';
+// Stands in for a page reload: unmount properly, so the persist effect of the
+// old tree is torn down before the new one mounts, then mount again against
+// whatever is in local storage.
+function remount() {
+    cleanup();
     renderApp();
 }

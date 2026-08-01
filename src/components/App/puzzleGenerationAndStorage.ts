@@ -32,13 +32,21 @@ export interface PuzzleState {
     availableWordNumbers: number[];
 }
 
+// Returns undefined for anything unusable, so the caller generates a fresh
+// puzzle. The two storage keys are written separately and can therefore go out
+// of step — a puzzle with a missing or corrupt tile state used to throw
+// `SyntaxError: Unexpected end of JSON input`, and this now runs during render,
+// where a throw takes the whole app down rather than one effect.
 export function readPuzzleStateFromLocalStorage(): PuzzleState | undefined {
-    if (puzzleInLocalStorage()) {
+    if (!puzzleInLocalStorage()) {
+        return undefined;
+    }
+    try {
         const { matrix, solution } = readPuzzleFromLocalStorage();
         const tileState = readTileStateFromLocalStorage();
         const availableWordNumbers = getUnusedWordNumbers(tileState);
         return { matrix, solution, tileState, availableWordNumbers };
-    } else {
+    } catch {
         return undefined;
     }
 }
