@@ -63,8 +63,14 @@ Nothing open — `npm run lint` now exits clean (see Done above).
 ### Dependencies
 
 - [ ] **Major upgrades, each worth its own PR** (deliberately excluded from #2):
-  - [ ] `@vitejs/plugin-react` 4 → 6 (pairs with vite; config-surface changes)
-  - [ ] `jest` 29 → 30 + `@types/jest` 30 (needs matching `ts-jest`; only 6 small suites)
+  - [ ] `@vitejs/plugin-react` 4 → 6 — **blocked on the vite hold, not independent.**
+        6.x peer-requires `vite: ^8.0.0`, so it cannot land while vite stays on 6.
+        Do it together with vite 6 → 8 or not at all.
+  - [x] `jest` 29 → 30 + `@types/jest` 30 — done. No matching `ts-jest` major
+        needed: `ts-jest@29.4.12` already declares `jest: ^29 || ^30`, so it
+        stays on 29. No config or test changes at all — `jest.config.js` was
+        untouched and all 8 suites (25 tests) passed first try, along with
+        build, lint and `npm audit`.
   - [ ] `eslint` 9 → 10, `@eslint/js` 10, `@eslint-react/eslint-plugin` 1 → 5,
         `eslint-plugin-react-hooks` 5 → 7 (lint-only, cannot break the build, but
         will surface many new findings — do after the lint fix above)

@@ -8,7 +8,7 @@ word game. React 19 + TypeScript, built with Vite, tested with Jest via ts-jest.
 ```bash
 npm run dev      # vite dev server
 npm run build    # production build into dist/
-npm test         # jest, 6 suites
+npm test         # jest, 8 suites
 npm run lint     # eslint (flat config)
 ```
 
