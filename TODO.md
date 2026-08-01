@@ -66,7 +66,17 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Build / tooling
 
-Nothing open — `npm run lint` now exits clean (see Done above).
+- [ ] **CI runs neither lint nor tests, and pins no Node version.**
+      `.github/workflows/deploy-to-gh-pages.yml` runs only `npm ci && npm run
+      build`, with no `actions/setup-node` step at all — it uses whatever Node
+      is preinstalled on `ubuntu-latest`, which drifts as GitHub updates the
+      runner image. Raised by Copilot on PR #6. Two parts, both worth doing
+      together: add `setup-node` pinned to the declared `engines.node` range
+      (with `cache: npm`), and add `npm run lint` and `npm test` as gate steps
+      so the PR check verifies more than that the bundle compiles. Note the
+      engine floor only starts mattering once lint actually runs in CI — the
+      build path does not execute ESLint. `actions/checkout` is still on v3
+      while the deploy action is on v4; bump it in the same pass.
 
 ### Dependencies
 
@@ -79,8 +89,8 @@ Nothing open — `npm run lint` now exits clean (see Done above).
         stays on 29. No config or test changes at all — `jest.config.js` was
         untouched and all 8 suites (25 tests) passed first try, along with
         build, lint and `npm audit`.
-  - [x] `eslint` 9 → 10, `@eslint/js` 10, `@eslint-react/eslint-plugin` 1 → 5,
-        `eslint-plugin-react-hooks` 5 → 7 — done, plus `@eslint/compat` 1 → 2 and
+  - [x] `eslint` 9 → 10, `@eslint/js` 10, `eslint-plugin-react-hooks` 5 → 7 —
+        done, plus `@eslint/compat` 1 → 2 and
         `eslint-plugin-promise` 7.2 → 7.3 (both needed for the eslint 10 peer).
         Two config changes were required. First, `eslint.config.mjs` imported
         `FlatCompat` from `@eslint/eslintrc` — an **undeclared phantom dep**, and
@@ -89,8 +99,17 @@ Nothing open — `npm run lint` now exits clean (see Done above).
         own flat config. Second, react-hooks 7 moved the flat config: `configs
         .recommended` and `configs['recommended-latest']` are both still the
         eslintrc array form, the flat one is `configs.flat['recommended-latest']`.
-        Removed `eslint-plugin-react` — unused by the config and the hard blocker
-        (no release peers eslint 10).
+        Removed **two unused plugins** rather than upgrading dead weight:
+        `eslint-plugin-react` (nothing in the flat config references it, and it
+        was the hard blocker — no release peers eslint 10) and
+        `@eslint-react/eslint-plugin` (also unreferenced; it was the sole source
+        of a `>=22.0.0` Node floor). Neither is needed to run lint in CI; the
+        config imports neither. Re-adding either would be a deliberate "we want
+        React-specific rules" decision, not a prerequisite for anything.
+        `engines.node` is now declared as `^20.19.0 || ^22.13.0 || >=24` — the
+        ESLint 10 range, which is the tightest among direct deps and satisfies
+        `sass` (>=20.19), `vite` and `jest`. npm does not enforce this without
+        `engine-strict`, so it documents and warns rather than protects.
   - [ ] `vite` 6 → 8 — on hold, two majors, no reason to churn
   - [ ] `typescript` 5.8 → 7 — on hold, deliberate project not a dep bump
 

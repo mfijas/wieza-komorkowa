@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
   "homepage": "https://mfijas.github.io/wieza-komorkowa/",
   "dependencies": {
     "lodash-es": "^4.17.21",
@@ -39,7 +42,6 @@
     ]
   },
   "devDependencies": {
-    "@eslint-react/eslint-plugin": "^5.18.1",
     "@eslint/compat": "^2.1.0",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^6.6.3",
