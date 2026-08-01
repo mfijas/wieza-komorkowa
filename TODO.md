@@ -163,7 +163,19 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Build / tooling
 
-Nothing open — CI now pins Node and gates on lint + tests (see Done above).
+- [ ] **Add a `typecheck` script and gate CI on it.** Nothing in this repo
+      runs `tsc`. `npm run build` is `vite build`, which transpiles without
+      typechecking; `npm test` typechecks only what the suites import, through
+      ts-jest; lint's type-aware rules are not a substitute for a full check.
+      So a type error in an unimported module reaches `master` uncaught, and
+      the declared `typescript` version barely affects any command we run.
+      Add `"typecheck": "tsc --noEmit"` and a step for it in
+      `.github/workflows/deploy-to-gh-pages.yml`, alongside the existing
+      `npm run lint` / `npm test` / `npm run build` steps. It passes clean
+      today (verified on the TS 6 bump), so this should land green.
+
+      **Do this before revisiting TypeScript 7**, so that upgrade has a
+      measurable effect to verify rather than being invisible to CI.
 
 ### Dependencies
 
@@ -237,9 +249,9 @@ Nothing open — CI now pins Node and gates on lint + tests (see Done above).
           transpiles without typechecking, and there is no `typecheck` script.
           The TS version only reaches the editor's language server and, through
           the JS API, ts-jest and the type-aware lint rules. The 10x native
-          compiler has nothing here to be 10x on. Worth adding a `typecheck`
-          script to CI *before* revisiting 7, so the upgrade has a measurable
-          effect to verify.
+          compiler has nothing here to be 10x on. Filed as an open item under
+          **Build / tooling** above: add a `typecheck` script and gate CI on it
+          *before* revisiting 7.
         - **Two tsconfig changes were required**, both flagged by TS 6 as
           deprecation errors — which is the point of the 6.x staging step:
           `moduleResolution` `"node"` (node10) is removed in 7 and is now
