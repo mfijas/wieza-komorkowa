@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Actions are not in package.json, so npm outdated never sees them. Without
+  # this they drift until a runner deprecation warning shows up in a build log.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
