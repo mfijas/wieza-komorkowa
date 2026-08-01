@@ -125,6 +125,19 @@ Neither `eslint-plugin-react` nor `@eslint-react` is installed, and that is a
 decision, not an oversight — see TODO.md for the measurements. `eslint-plugin-react`
 is *broken* on eslint 10, not just unsupported. Do not add either back casually.
 
+### A major dep bump can fail `npm install` against the *old* tree
+
+Upgrading `vite` 6 → 8 with `@vitejs/plugin-react` 4 → 6 errored with
+`Conflicting peer dependency: @babel/core@8.0.1` — plugin-react 6's optional
+peer `@rolldown/plugin-babel` wants babel 8, while plugin-react 4 had pinned
+babel 7 in the existing tree. Nothing was actually incompatible; npm was just
+resolving against stale state.
+
+Do **not** reach for `--force` or `--legacy-peer-deps`. Edit the versions in
+`package.json`, delete `node_modules` and `package-lock.json`, and run a plain
+`npm install` — it resolves cleanly from scratch. Try that before concluding a
+major is blocked.
+
 ### The `js-yaml` override is deliberate
 
 `package.json` has `overrides: { "js-yaml": "^4.1.1" }`. It force-upgrades
