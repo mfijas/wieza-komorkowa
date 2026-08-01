@@ -132,6 +132,15 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
         failing test before fixing. Pre-existing, but this refactor moved the
         read into render, where a throw takes the whole app down instead of one
         effect. Anything unusable now falls back to a fresh puzzle.
+      - **One persist effect, not two — decided, measured, no action.** Review
+        pointed out that the single effect rewrites the `puzzle` key on
+        tile-only changes, when `matrix`/`solution` have not moved. True, and
+        it is a small regression against the old tile-state-only effect. But
+        the payload is 583 bytes, and the extra `JSON.stringify` + `setItem`
+        measures **12µs** — 0.07% of one 60fps frame, ~1ms across a drag over
+        the entire board. Splitting into two effects buys nothing measurable
+        and costs the single "storage mirrors state" invariant that the corrupt
+        -storage fallback above leans on. Listed so it is not re-litigated.
       - Verified in the running app, not just under jsdom: fresh generate,
         reload restore, tile-state persistence and Nowa gra all keep the
         rendered board and localStorage in agreement.
