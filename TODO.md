@@ -49,6 +49,14 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
 
 ### Enhancements
 
+- [ ] **`react-hooks/set-state-in-effect` in `src/components/App/App.tsx:48`**,
+      surfaced by the react-hooks 7 upgrade and currently set to `'warn'` in
+      `eslint.config.mjs`. The mount effect seeds four states from localStorage.
+      The fix is lazy `useState` initializers, but that also changes when the
+      persist effect at `App.tsx:34` first fires (it would run on mount and
+      write to storage immediately), so it is a behaviour change, not a
+      mechanical edit. Own PR.
+
 - [ ] **Boards above 136 cells need a wider cell encoding.** `generatePuzzle`
       now rejects them rather than hanging, so this is a feature limit, not a
       bug. Lifting it means giving up one-character cells — the matrix is a
@@ -71,9 +79,18 @@ Nothing open — `npm run lint` now exits clean (see Done above).
         stays on 29. No config or test changes at all — `jest.config.js` was
         untouched and all 8 suites (25 tests) passed first try, along with
         build, lint and `npm audit`.
-  - [ ] `eslint` 9 → 10, `@eslint/js` 10, `@eslint-react/eslint-plugin` 1 → 5,
-        `eslint-plugin-react-hooks` 5 → 7 (lint-only, cannot break the build, but
-        will surface many new findings — do after the lint fix above)
+  - [x] `eslint` 9 → 10, `@eslint/js` 10, `@eslint-react/eslint-plugin` 1 → 5,
+        `eslint-plugin-react-hooks` 5 → 7 — done, plus `@eslint/compat` 1 → 2 and
+        `eslint-plugin-promise` 7.2 → 7.3 (both needed for the eslint 10 peer).
+        Two config changes were required. First, `eslint.config.mjs` imported
+        `FlatCompat` from `@eslint/eslintrc` — an **undeclared phantom dep**, and
+        eslint 10 drops eslintrc entirely. It was only bridging
+        `plugin:react-hooks/recommended`, so it is gone in favour of the plugin's
+        own flat config. Second, react-hooks 7 moved the flat config: `configs
+        .recommended` and `configs['recommended-latest']` are both still the
+        eslintrc array form, the flat one is `configs.flat['recommended-latest']`.
+        Removed `eslint-plugin-react` — unused by the config and the hard blocker
+        (no release peers eslint 10).
   - [ ] `vite` 6 → 8 — on hold, two majors, no reason to churn
   - [ ] `typescript` 5.8 → 7 — on hold, deliberate project not a dep bump
 
