@@ -313,3 +313,17 @@ Nothing open — the typecheck script and its CI gate have landed (see Done).
       3.15.1 and audit is still clean), but it is safe — the only forced
       consumer calls `yaml.load()`, which exists in both majors. Listed so this
       is not re-litigated.
+      - **The override is a small positive, not just inertia.** js-yaml swapped
+        the two function names between majors: in 3.x `load()` is the *unsafe*
+        one and `safeLoad()` is guarded; in 4.x `safeLoad` is gone and `load()`
+        is safe by default. The lone call site —
+        `@istanbuljs/load-nyc-config/index.js:80`, parsing a `.nycrc.yaml` —
+        therefore gets safe parsing *because* of the override. Theoretical here
+        (no such file in this repo, and the path is dev-only), but it means the
+        override earns its keep rather than merely costing nothing.
+      - Re-checked 2026-08-01: still exactly one consumer, reached via
+        `ts-jest → @jest/transform → babel-plugin-istanbul →
+        @istanbuljs/load-nyc-config`, which still declares `^3.13.1`. Nothing
+        else in the tree depends on js-yaml at all, so "dedupes the tree" is now
+        really "there is only one copy, and it is 4.3.1". The override becomes a
+        no-op — and deletable — only once that package widens its range to 4.x.

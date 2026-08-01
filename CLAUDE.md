@@ -178,6 +178,11 @@ typechecking.
 onto one version. It is no longer needed for security, but it is safe (the
 forced consumer calls `yaml.load()`, present in both majors). Decided: keep.
 
+It is in fact a mild improvement: js-yaml swapped the names between majors, so
+3.x's `load()` is the *unsafe* parser while 4.x's is safe by default. That lone
+call site gets the safe one because of the override. It stops being useful only
+when `@istanbuljs/load-nyc-config` widens its `^3.13.1` range itself.
+
 ## Conventions
 
 - A PR is not mandatory — match the ceremony to the weight of the change.
