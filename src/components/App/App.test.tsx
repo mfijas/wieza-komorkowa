@@ -10,6 +10,11 @@ import { emptyTileState } from './tileState';
 const WIDTH = 7;
 const HEIGHT = 12;
 
+// Every test here mounts a real board, and puzzle generation is deliberately
+// expensive — the new-game test generates two. That fits the default 5s locally
+// but overran it on CI, which is slower.
+jest.setTimeout(30_000);
+
 // The board React actually rendered, as one row-major uppercase string.
 function renderedBoard() {
     return Array.from(document.querySelectorAll('#grid button'))
@@ -77,8 +82,10 @@ describe('App', () => {
         expect(document.querySelectorAll('#grid button')[0]).toHaveClass('t1');
     });
 
+    // `delay: null` drops userEvent's artificial pause between events, which is
+    // pure waiting here — nothing debounces.
     it('replaces both the rendered and the stored puzzle on a new game', async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ delay: null });
         renderApp();
         const firstBoard = renderedBoard();
 
