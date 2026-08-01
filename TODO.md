@@ -17,19 +17,44 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       the crash had been masking, in a `GeneratePuzzle.test.ts` smoke test
       that asserted nothing; gave it real assertions. Lint now exits 0.
 - [x] Add `CLAUDE.md` so future sessions start informed — PR #4.
+- [x] Fix the base-parsing bug in `src/puzzle/resolveMatrix.ts:6`. Confirmed
+      real: `puzzleGeneration.ts` encodes cells with `n.toString(32)` and
+      decodes elsewhere with `parseInt(c, 32)`, so the `parseInt(currentCell, 30)`
+      in `resolveMatrix` was the lone outlier — base 32 is the intended
+      alphabet. Words 30 (`'u'`) and 31 (`'v'`) are invalid in base 30 and
+      parsed to `NaN`, so `words[NaN]` was `undefined` and the resolve threw.
+      Latent only: unreachable at the live 7×12 board. Changed 30 → 32 and
+      added a regression test to `resolveMatrix.test.ts` that fails against the
+      bug. Deleted `baseParsingBug.test.ts` — it asserted the buggy behavior
+      (`expect(...).toThrow()`), so it locked the bug in and would have failed
+      against the fix.
+- [x] Single-source the cell base and validate board size — same PR. The base
+      and the `numberToChar`/`charToNumber` pair now live in
+      `src/puzzle/cellEncoding.ts`; `resolveMatrix` decodes through
+      `charToNumber` instead of its own `parseInt`, so encoder and decoder can
+      no longer drift. `generatePuzzle` rejects any board whose worst-case word
+      count exceeds `MAX_WORDS`. The real ceiling is **136 cells**, not the 128
+      first estimated from `floor(cells / MIN_WORD_LEN)` — that bound ignores
+      how `randomizeWordLengths` actually terminates. Without the check an
+      oversized board did not corrupt the matrix as first assumed: it hung
+      synchronously, blocking the event loop hard enough that Jest's own
+      timeout could not fire.
 
 ## Open
 
 ### Bugs
 
-- [ ] **Base-parsing bug in `src/puzzle/resolveMatrix.ts:6`.**
-      `src/puzzle/baseParsingBug.test.ts` (untracked, currently passing) asserts
-      the parse should use base 32, not base 30 — i.e. `parseInt(currentCell, 30)`
-      → `parseInt(currentCell, 32)`. State of this work is unclear; the test
-      documents the fix via `console.log` rather than failing on it, so it is
-      characterizing current behavior rather than driving a fix. Needs a look at
-      what the intended alphabet size actually is before changing anything, and
-      the test should be made to fail against the bug (and be committed) first.
+Nothing open — the base-parsing bug and the board-size limit are both fixed
+(see Done above).
+
+### Enhancements
+
+- [ ] **Boards above 136 cells need a wider cell encoding.** `generatePuzzle`
+      now rejects them rather than hanging, so this is a feature limit, not a
+      bug. Lifting it means giving up one-character cells — the matrix is a
+      flat string and `replaceAt` assumes a single character per cell, so a
+      two-character encoding is not a drop-in change. Only worth doing if a
+      board larger than 136 cells is actually wanted; 7×12 is 84.
 
 ### Build / tooling
 
