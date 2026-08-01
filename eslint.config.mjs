@@ -9,7 +9,7 @@ export default tseslint.config(
     // words.ts is generated. dist/ and coverage/ are build output — they must
     // stay ignored, or the type-aware rules below crash on files that are not
     // in any tsconfig project.
-    ignores: ['src/puzzle/words.ts', 'dist/**/*.*', 'coverage/**/*.*'],
+    ignores: ['src/puzzle/words.ts', 'dist/**', 'coverage/**'],
   },
 
   // The app: full type-aware linting.
