@@ -72,6 +72,19 @@ Three separate exclusions are needed, because none of these tools reads
 - `.claude/**` in the `ignores` block of `eslint.config.mjs`
 - `.claude/worktrees/` in `.gitignore`
 
+**The flip side: `npm test` finds nothing when run from inside a worktree.**
+The ignore patterns are matched against absolute paths, and a worktree's own
+path contains `/.claude/worktrees/`, so every suite in it is excluded — jest
+exits 1 with `No tests found` and blames the directory, not the config. To
+verify a change from within a worktree, override both patterns:
+
+```bash
+npx jest --testPathIgnorePatterns /node_modules/ --modulePathIgnorePatterns /nonexistent-dir/
+```
+
+(`--modulePathIgnorePatterns` needs a value; an empty one is a CLI parse error.)
+CI is unaffected — it checks out clean, with no `.claude/worktrees` in the path.
+
 Do not drop any of them. If lint or tests start behaving oddly anyway, check
 `git worktree list` — a worktree can still hold commits that exist nowhere
 else, so remove it deliberately rather than deleting the directory.
