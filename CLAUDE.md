@@ -64,13 +64,22 @@ without declaring it — another phantom dep, and eslint 10 removed eslintrc
 support outright. Do not reintroduce the eslintrc bridge; use plugins' own flat
 configs.
 
-### Generated output must stay out of ESLint
+### Type-aware rules crash on anything outside the tsconfig project
 
-`recommendedTypeChecked` applies type-aware rules globally, so any JS outside
-the tsconfig project crashes the run with "You have used a rule which requires
-type information". `dist/**` and `coverage/**` are both in the `ignores` list in
-`eslint.config.mjs` for this reason. Adding a new generated directory means
-adding it there too.
+Any file linted with `recommendedTypeChecked` but not in `tsconfig.json`'s
+project kills the whole run with "You have used a rule which requires type
+information". `eslint.config.mjs` now has two blocks: `src/**` gets the
+type-aware set, and `scripts/**` + the config files get a non-type-aware block
+(`project: false`). Generated output — `src/puzzle/words.ts`, `dist/**`,
+`coverage/**` — stays in `ignores`. A new generated directory needs adding
+there; new hand-written code outside `src/` needs adding to the second block,
+not to `ignores`.
+
+### React linting is react-hooks + react-refresh, deliberately
+
+Neither `eslint-plugin-react` nor `@eslint-react` is installed, and that is a
+decision, not an oversight — see TODO.md for the measurements. `eslint-plugin-react`
+is *broken* on eslint 10, not just unsupported. Do not add either back casually.
 
 ### The `js-yaml` override is deliberate
 

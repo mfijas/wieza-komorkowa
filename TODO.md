@@ -40,6 +40,52 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       synchronously, blocking the event loop hard enough that Jest's own
       timeout could not fire.
 
+- [x] **Reviewed the lint configuration as a whole** — one deliberate pass over
+      `eslint.config.mjs` instead of piecemeal edits. Outcomes:
+      - **No React linting beyond `eslint-plugin-react-hooks`.** Decided against
+        both candidates, on measurement rather than taste. `eslint-plugin-react`
+        is not merely unsupported on eslint 10 (latest 7.37.5 peers `^9.7`), it
+        is **broken**: forced in, every rule using the old context API dies with
+        `contextOrFilename.getFilename is not a function`. `@eslint-react` 5.18.1
+        runs fine and adds exactly **9 warnings — 4 duplicating the react-hooks
+        `set-state-in-effect` finding below, and 5 `no-array-index-key`** in
+        App.tsx and Grid.tsx, where index keys are arguably correct (the board is
+        fixed-size and cells never reorder). One new rule, on code that is
+        probably fine, was not worth the dependency. react-hooks 7 is also a much
+        wider net than it used to be — it absorbed the React Compiler checks —
+        which is why "just react-hooks" is now the mainstream default, and is
+        what the `create-vite` React+TS template ships.
+      - **Added `eslint-plugin-react-refresh`** (`configs.vite`), the fourth
+        plugin in that same Vite template and the one real gap. Its
+        `only-export-components` catches a genuine Fast Refresh footgun — a
+        module exporting a component *and* something else silently degrades to
+        full reloads, losing component state, with no error. Dev-experience only;
+        it does not affect the build. Codebase was already clean against it.
+      - **Dropped `@eslint/compat` and `eslint-plugin-only-warn`**, both unused.
+        `only-warn` was a real decision, not just cleanup: it downgrades every
+        rule to a warning, which would have hollowed out the CI lint gate that is
+        still open below.
+      - **`scripts/**`, `vite.config.ts`, `jest.config.js` and
+        `eslint.config.mjs` are now linted** with a second, non-type-aware config
+        block. They are outside `tsconfig.json`'s project, so type-aware rules
+        crash on them; the block gets the syntactic rules only. Only
+        `src/puzzle/words.ts` (generated), `dist/` and `coverage/` remain ignored.
+        This **surfaced 3 real errors**, all now fixed: two dead loader functions
+        (`loadAspellDump`, `loadOdm`) deleted from the one-off word-list scripts,
+        and `no-useless-escape` on `jest.config.js`'s transform pattern, which was
+        written `"^.+\.tsx?$"` — in a **string** literal, so the backslash was
+        consumed and the regex matched any character where a literal dot was
+        meant. Harmless in practice (it still matches every real `.ts`/`.tsx`
+        path) but wrong; now `"^.+\\.tsx?$"`. All 8 suites still pass.
+      - **Deleted the dead trailing block** and the inert
+        `settings: { react: { version: 'detect' } }`. The config is now
+        restructured around `tseslint.config()` with `extends` per block, so
+        `recommendedTypeChecked` is scoped to `src/**` instead of applying
+        globally — which is what made stray JS crash the run in the first place.
+        Switched to `projectService: true` over an explicit `project` path.
+      - Also removed the stale CRA `eslintConfig` key (`extends: react-app`)
+        from `package.json`. Nothing has read it since the flat config landed.
+
 ## Open
 
 ### Bugs
@@ -65,41 +111,6 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
       board larger than 136 cells is actually wanted; 7×12 is 84.
 
 ### Build / tooling
-
-- [ ] **Review the lint configuration as a whole.** `eslint.config.mjs` has
-      accumulated cruft and unexamined choices; the eslint 10 upgrade (#6)
-      surfaced several. Worth one deliberate pass rather than piecemeal edits:
-  - [ ] **Decide whether to actually adopt React linting.** `eslint-plugin-react`
-        and `@eslint-react/eslint-plugin` were both declared as devDependencies
-        but never referenced by the flat config, and #6 removed them rather than
-        carrying dead weight. The question they raise is still open and is a
-        real one: today the only React rules in force come from
-        `eslint-plugin-react-hooks`. If we want JSX/component rules, pick **one**
-        of the two (they overlap heavily — `eslint-plugin-react` is the classic,
-        `@eslint-react` the TS-first rewrite), add it to the config, and budget
-        for the findings. If we don't, they stay out.
-  - [ ] **The last config block is dead.** It targets `eslint.config.mjs` and
-        `jest.config.js` to turn off type-aware rules, but both files are in the
-        `ignores` list above, so it never applies to anything. Its rule entry
-        `'@typescript-eslint/*': 'off'` would not work regardless — ESLint has no
-        wildcard rule names, so that is not "disable the namespace", it is an
-        unknown rule that only escapes an error because the block is unreachable.
-        Delete it, or stop ignoring those files and write it correctly.
-  - [ ] **Two more unused devDependencies:** `@eslint/compat` and
-        `eslint-plugin-only-warn`. Neither is imported by the config. Left in
-        place during #6 because, unlike the React plugins, they were not blocking
-        anything — but they should be dropped or actually used. `only-warn` in
-        particular is a real decision: it downgrades every rule to a warning,
-        which would change what a CI lint gate means.
-  - [ ] **A lot is simply not linted:** `scripts/**`, `vite.config.ts`,
-        `jest.config.js`, `eslint.config.mjs` and `src/puzzle/words.ts` are all
-        ignored. `words.ts` is generated and obviously fine to skip, but the
-        config files and `scripts/` are hand-written code that currently gets no
-        checking at all. `scripts/` is excluded from the tsconfig project, which
-        is why type-aware rules would crash on it — fixing that means either a
-        second tsconfig or a non-type-aware config block for those paths.
-  - [ ] **`settings: { react: { version: 'detect' } }` is inert** now that no
-        plugin reads it. Remove it, or it becomes misleading.
 
 - [ ] **CI runs neither lint nor tests, and pins no Node version.**
       `.github/workflows/deploy-to-gh-pages.yml` runs only `npm ci && npm run
