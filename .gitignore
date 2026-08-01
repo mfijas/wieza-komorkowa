@@ -23,3 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 /dist
+
+# claude code — personal settings and scratch worktrees
+.claude/settings.local.json
+.claude/worktrees/

@@ -39,6 +39,50 @@ explicitly. Do not "clean it up" as an unused dependency.
 Watch for this class of failure generally: if a dependency upgrade breaks module
 resolution, check whether something was relying on a package it never declared.
 
+### Component tests are jsdom per-file, not globally
+
+`testEnvironment` in `jest.config.js` is `"node"`, because the 8 `src/puzzle/`
+suites are pure logic and jsdom only slows them down. Component tests opt in
+with a `@jest-environment jsdom` docblock at the top of the file — see
+`src/components/App/App.test.tsx`.
+
+ts-jest cannot parse `.scss` or `.png`, so asset imports are mapped to
+`src/assetStub.ts` via `moduleNameMapper`. It exports a **string**, not an
+object, because image imports are used as `src` attributes. A new asset
+extension needs adding to that mapping or the suite dies with
+`SyntaxError: Invalid or unexpected token` pointing at a binary file.
+
+`jest-environment-jsdom` is a required devDependency — jest has not bundled it
+since v28.
+
+### `.claude/` is excluded from jest and eslint on purpose
+
+Claude Code puts worktrees in `.claude/worktrees/`, and those are **full
+checkouts of this repo**. Before they were excluded, a single stray one made
+jest run every suite twice (17 instead of 9) and made eslint fail every
+config-file lint with `No tsconfigRootDir was set, and multiple candidate
+TSConfigRootDirs are present` — an error that points at files you never
+touched. Local only; CI checks out clean.
+
+Three separate exclusions are needed, because none of these tools reads
+`.gitignore`:
+
+- `testPathIgnorePatterns` / `modulePathIgnorePatterns` in `jest.config.js`
+- `.claude/**` in the `ignores` block of `eslint.config.mjs`
+- `.claude/worktrees/` in `.gitignore`
+
+Do not drop any of them. If lint or tests start behaving oddly anyway, check
+`git worktree list` — a worktree can still hold commits that exist nowhere
+else, so remove it deliberately rather than deleting the directory.
+
+### What of `.claude/` is committed
+
+`settings.json` (shared permissions) and `launch.json` (dev server config) are
+committed; `settings.local.json` is personal and gitignored. Keep the shared
+allowlist to project-scoped commands — `npm run`, `npm test`, `npm audit`.
+Anything with reach beyond the repo (`git push`, `gh auth`) belongs in the
+local file, since committing it grants it to everyone who opens the repo.
+
 ### Deploys are master-only, and there are no branch previews
 
 `.github/workflows/deploy-to-gh-pages.yml` publishes to GitHub Pages. Pages

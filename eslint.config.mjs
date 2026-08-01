@@ -8,8 +8,10 @@ export default tseslint.config(
   {
     // words.ts is generated. dist/ and coverage/ are build output — they must
     // stay ignored, or the type-aware rules below crash on files that are not
-    // in any tsconfig project.
-    ignores: ['src/puzzle/words.ts', 'dist/**', 'coverage/**'],
+    // in any tsconfig project. .claude/ holds Claude Code worktrees, which are
+    // full checkouts of this repo: linting one makes tsconfigRootDir ambiguous
+    // and fails the whole run. See CLAUDE.md.
+    ignores: ['src/puzzle/words.ts', 'dist/**', 'coverage/**', '.claude/**'],
   },
 
   // The app: full type-aware linting.
@@ -30,11 +32,6 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/await-thenable': 'error',
-      // New in eslint-plugin-react-hooks 7. It flags the mount effect in
-      // App.tsx that seeds four states from localStorage. Fixing it means
-      // moving to lazy useState initializers, which changes when the persist
-      // effect first fires — a refactor with its own PR. See TODO.md.
-      'react-hooks/set-state-in-effect': 'warn',
     },
   },
 
