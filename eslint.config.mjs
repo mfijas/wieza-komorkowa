@@ -18,7 +18,7 @@ export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
-    ignores: ['eslint.config.mjs', 'src/puzzle/words.ts', 'scripts/**/*.*', 'vite.config.ts', 'jest.config.js', 'dist/**/*.*']
+    ignores: ['eslint.config.mjs', 'src/puzzle/words.ts', 'scripts/**/*.*', 'vite.config.ts', 'jest.config.js', 'dist/**/*.*', 'coverage/**/*.*']
   },
   ...compat.extends('plugin:react-hooks/recommended'),
   pluginPromise.configs['flat/recommended'],
