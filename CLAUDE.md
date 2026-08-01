@@ -138,6 +138,25 @@ Do **not** reach for `--force` or `--legacy-peer-deps`. Edit the versions in
 `npm install` — it resolves cleanly from scratch. Try that before concluding a
 major is blocked.
 
+### TypeScript is pinned at 6.x on purpose — 7 has no JS compiler API
+
+`typescript@7` is the Go port. Its main export is `lib/version.cjs`: a version
+string and nothing else. Every tool that imports the compiler as a library —
+here `ts-jest` and `typescript-eslint` — breaks on it, and `npm install` refuses
+the tree outright on `@typescript-eslint/parser`'s peer range. The replacement
+API is expected in 7.1. Do not force it with `--legacy-peer-deps`; that installs
+and then fails all 9 suites at run time.
+
+6.x is the staging release: it reports everything 7 removes as a deprecation
+error, which is how `moduleResolution: "node"` → `"bundler"` and the now-required
+explicit `rootDir` were found. Note that `tsc --noEmit` does **not** report the
+`rootDir` one — only something that emits does, i.e. ts-jest. Validate a TS bump
+with `npm test`, not just `tsc`.
+
+Nothing in this repo runs `tsc` in CI (`npm run build` is `vite build`, which
+does not typecheck), so the TS version only affects the editor, ts-jest and the
+type-aware lint rules.
+
 ### The `js-yaml` override is deliberate
 
 `package.json` has `overrides: { "js-yaml": "^4.1.1" }`. It force-upgrades
