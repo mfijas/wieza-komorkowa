@@ -77,8 +77,9 @@ else, so remove it deliberately rather than deleting the directory.
 
 ### What of `.claude/` is committed
 
-`settings.json` (shared permissions) and `launch.json` (dev server config) are
-committed; `settings.local.json` is personal and gitignored. Keep the shared
+`settings.json` (shared permissions), `launch.json` (dev server config) and
+`skills/` (project skills, e.g. `/next-todo`, which picks up the next item from
+`TODO.md`) are committed; `settings.local.json` is personal and gitignored. Keep the shared
 allowlist to project-scoped commands — `npm run`, `npm test`, `npm audit`.
 Anything with reach beyond the repo (`git push`, `gh auth`) belongs in the
 local file, since committing it grants it to everyone who opens the repo.
