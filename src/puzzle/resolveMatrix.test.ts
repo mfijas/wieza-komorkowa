@@ -23,7 +23,7 @@ test('should replace numbers with words', () => {
 });
 
 test('should decode with the same base puzzleGeneration encodes with', () => {
-    // puzzleGeneration.numberToChar uses n.toString(32), so word 30 is 'u' and
+    // cellEncoding.numberToChar uses n.toString(32), so word 30 is 'u' and
     // word 31 is 'v'. Both are invalid in base 30 and parse to NaN.
     const wordNumbers = [30, 31];
     const matrix = wordNumbers.map(n => n.toString(32)).join('');

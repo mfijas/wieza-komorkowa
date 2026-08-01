@@ -28,19 +28,33 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       bug. Deleted `baseParsingBug.test.ts` — it asserted the buggy behavior
       (`expect(...).toThrow()`), so it locked the bug in and would have failed
       against the fix.
+- [x] Single-source the cell base and validate board size — same PR. The base
+      and the `numberToChar`/`charToNumber` pair now live in
+      `src/puzzle/cellEncoding.ts`; `resolveMatrix` decodes through
+      `charToNumber` instead of its own `parseInt`, so encoder and decoder can
+      no longer drift. `generatePuzzle` rejects any board whose worst-case word
+      count exceeds `MAX_WORDS`. The real ceiling is **136 cells**, not the 128
+      first estimated from `floor(cells / MIN_WORD_LEN)` — that bound ignores
+      how `randomizeWordLengths` actually terminates. Without the check an
+      oversized board did not corrupt the matrix as first assumed: it hung
+      synchronously, blocking the event loop hard enough that Jest's own
+      timeout could not fire.
 
 ## Open
 
 ### Bugs
 
-- [ ] **Single-char cell limit caps puzzles at 32 words.** `numberToChar` in
-      `src/puzzle/puzzleGeneration.ts:18` returns `n.toString(32)`, which is two
-      characters from 32 upward (`'10'`). Matrix cells are single characters, so
-      `setAt`/`replaceAt` would corrupt the matrix rather than throw. Not
-      reachable at the live 7×12 board (84 cells / min word length 4 = 21 words
-      max), and not reachable at any board under 128 cells. Fix by widening the
-      cell encoding (or asserting the word count) if larger boards are ever
-      wanted — see the base-parsing fix below for the encode/decode contract.
+Nothing open — the base-parsing bug and the board-size limit are both fixed
+(see Done above).
+
+### Enhancements
+
+- [ ] **Boards above 136 cells need a wider cell encoding.** `generatePuzzle`
+      now rejects them rather than hanging, so this is a feature limit, not a
+      bug. Lifting it means giving up one-character cells — the matrix is a
+      flat string and `replaceAt` assumes a single character per cell, so a
+      two-character encoding is not a drop-in change. Only worth doing if a
+      board larger than 136 cells is actually wanted; 7×12 is 84.
 
 ### Build / tooling
 

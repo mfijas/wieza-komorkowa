@@ -1,5 +1,6 @@
 import { chunk, shuffle, tail } from 'lodash-es';
 import { resolveMatrix } from './resolveMatrix';
+import { charToNumber, numberToChar } from './cellEncoding';
 
 function replaceAt(s: string, index: number, replacement: string) {
     return s.substring(0, index) + replacement + s.substring(index + replacement.length);
@@ -13,14 +14,6 @@ function indexToCoords(width: number, index: number) {
 
 function coordsToIndex(width: number, x: number, y: number) {
     return y * width + x;
-}
-
-function numberToChar(n: number) {
-    return n.toString(32);
-}
-
-function charToNumber(c: string) {
-    return parseInt(c, 32);
 }
 
 export function fillMatrix(width: number, height: number, words: string[]): { resolvedMatrix: string[][]; solutionMatrix: number[][] } {
