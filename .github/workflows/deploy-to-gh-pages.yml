@@ -1,5 +1,8 @@
 name: Build and Deploy
-on: [push]
+on:
+  push:
+    branches: [master]
+  pull_request:
 permissions:
   contents: write
 jobs:
@@ -15,7 +18,12 @@ jobs:
           npm ci
           npm run build
 
+      # Only master publishes to GitHub Pages. Pull requests run the build
+      # above as a verification gate, but must never touch the live site:
+      # Pages serves a single site from the gh-pages branch, so any other
+      # ref deploying here would overwrite production.
       - name: Deploy 🚀
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
