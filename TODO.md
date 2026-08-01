@@ -173,6 +173,21 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
         Verified both directions (9 suites inside a worktree; still 9, not 18,
         with a nested one present). CI was never affected — it checks out clean.
 
+- [x] **Configured Dependabot for the `npm` ecosystem.** It previously covered
+      `github-actions` only. Chosen scope: **patch/minor grouped into one weekly
+      PR, majors ignored** — routine drift stops accumulating the way it did
+      before PR #2, at one review a week, while held majors still land one at a
+      time by hand as they need config changes and contend over `node_modules`
+      and the lockfile.
+      - **The major `ignore` also suppresses security PRs.** Dependabot honours
+        `ignore` for security updates too, so an advisory whose only fix is a
+        major bump will not open a PR here. Accepted rather than worked around:
+        `npm audit` is already the habit and is in the shared allowlist. If that
+        proves too loose, the narrower fix is to name the held majors explicitly
+        instead of `dependency-name: "*"`.
+      - Takes effect only once this is on `master` — **Dependabot reads its
+        config from the default branch only**, so it does nothing until pushed.
+
 ## Open
 
 ### Bugs
@@ -267,7 +282,9 @@ Nothing open — the typecheck script and its CI gate have landed (see Done).
           the JS API, ts-jest and the type-aware lint rules. The 10x native
           compiler has nothing here to be 10x on. Filed as an open item under
           **Build / tooling** above: add a `typecheck` script and gate CI on it
-          *before* revisiting 7.
+          *before* revisiting 7. **(Since landed — `npm run typecheck` now runs
+          in CI, so this paragraph describes the state at the time of the TS 6
+          bump, not today.)**
         - **Two tsconfig changes were required**, both flagged by TS 6 as
           deprecation errors — which is the point of the 6.x staging step:
           `moduleResolution` `"node"` (node10) is removed in 7 and is now
@@ -282,17 +299,6 @@ Nothing open — the typecheck script and its CI gate have landed (see Done).
           `npm run lint` exits 0, `npm run build` succeeds, `npm audit` 0.
   - [ ] `typescript` 6 → 7 — blocked until `ts-jest` and `typescript-eslint`
         support the 7.1 API. See above.
-
-- [ ] **Configure Dependabot for the `npm` ecosystem.** `.github/dependabot.yml`
-      currently covers `github-actions` only (added when checkout/setup-node had
-      drifted two majors behind and surfaced as a Node 20 deprecation warning).
-      npm was left out on purpose: the majors above are on hold and meant to land
-      one at a time, so an unscoped npm entry would open a pile of PRs that
-      contend over `node_modules` and the lockfile. Decide on a scope that does
-      not fight that — security-only updates, or patch/minor grouped into a
-      single PR with `ignore` entries for the held majors (now just
-      `typescript`; vite and `@vitejs/plugin-react` have landed). Note Dependabot only reads its
-      config from the default branch.
 
 - [ ] **Watch for more phantom dependencies.** `jest.config.js:8` maps
       `lodash-es` → `lodash`, but `lodash` was never declared — it was only

@@ -9,3 +9,24 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+
+  # In-range drift accumulated unnoticed until it had to be cleared in one go
+  # (PR #2). Grouped into a single PR so routine bumps cost one review, not one
+  # per package.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    # Majors are held deliberately and land one at a time by hand — they need
+    # config changes and contend over node_modules and the lockfile. See TODO.md.
+    #
+    # Caveat: `ignore` also suppresses Dependabot *security* PRs for the ignored
+    # versions, so an advisory only fixed by a major bump will not open one here.
+    # `npm audit` stays the backstop for that; it is in the shared allowlist.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
