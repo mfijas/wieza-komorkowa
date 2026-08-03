@@ -272,6 +272,34 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
         `PuzzleState` is a single persisted object, so a `hintsUsed` field costs
         essentially nothing.
 
+- [ ] **Join adjacent tiles of the same word into one continuous shape.** In the
+      original game (andrewt.net/puzzles/cell-tower, screenshot supplied
+      2026-08-03) a marked word reads as a single rounded ribbon snaking through
+      the grid: neighbouring cells of the same word have no gap and no seam
+      between them, outer corners stay rounded, and where the ribbon turns the
+      inside of the bend is a *concave* fillet. Here every tile is drawn
+      independently — `Grid.tsx:80-88` emits one `<rect>` per cell inset by
+      `margin = 7` with `rx/ry = margin` — so a word currently looks like a row
+      of separate rounded squares in the same colour.
+      - The tile state needed is already local: a cell's four (and, for the
+        concave fillets, four diagonal) neighbours in `props.tileState` are in
+        hand at render time, so this is per-cell geometry, not a new data model.
+        `'selected'` should get the same treatment as a numbered word, so the
+        shape forms while dragging.
+      - **Cheapest shape: keep one `<rect>` per cell and vary the corner radii.**
+        A corner is rounded only when both of its adjoining edges face a
+        different word; when an edge faces the same word, extend the rect to the
+        cell boundary on that side so the two halves meet seamlessly. Per-corner
+        radii need a `<path>` rather than `rx`/`ry`, but it stays one element
+        per cell and needs no changes outside `Grid.tsx`/`Grid.scss`.
+      - The concave inner corner is the part that does not fall out for free: it
+        is a small arc drawn *into* the neighbouring cell's quadrant, so it has
+        to be painted by the cell diagonal to the bend (the one *not* in the
+        word) or by a second overlay path. Decide which before starting — it is
+        the difference between a half-hour change and a fiddly one.
+      - Worth doing alongside the mobile-drag item above: both are about making
+        selection legible on a touch screen.
+
 - [ ] **4.4MB bundle / 1.25MB gzipped, essentially all dictionary.**
       `src/puzzle/words.ts` is a 5MB source file exporting 447,880 entries as a
       JS array literal, so it is parsed *as code* and every string is
