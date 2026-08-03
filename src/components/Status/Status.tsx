@@ -8,6 +8,12 @@ import { allWords } from '../../puzzle/words';
 import { TileState } from '../App/tileState';
 import './Status.scss';
 
+// `allWords` is the full dictionary — hundreds of thousands of entries. Built
+// once at module scope rather than scanned per lookup: this ran as
+// `allWords.indexOf(...) !== -1` on every render, and Status re-renders on
+// every tile change, i.e. on each tile a drag passes over.
+const allWordsSet = new Set(allWords);
+
 interface StatusParams {
   matrix: string[][];
   tileState: TileState[][];
@@ -17,7 +23,7 @@ interface StatusParams {
 
 export function Status({ matrix, tileState, markWord, newGame }: StatusParams) {
   const selectedWord = extractSelectedWord(matrix, tileState);
-  const isProperWord = (selectedWord: string) => allWords.indexOf(selectedWord) !== -1;
+  const isProperWord = (selectedWord: string) => allWordsSet.has(selectedWord);
 
   function onClick() {
     if (!checkIfPuzzleCompleted(tileState)) {
