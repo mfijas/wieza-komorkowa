@@ -188,14 +188,99 @@ Open threads discovered while fixing the Dependabot advisory (2026-08-01).
       - Takes effect only once this is on `master` — **Dependabot reads its
         config from the default branch only**, so it does nothing until pushed.
 
+- [x] **Code review pass over the whole project (2026-08-03).** Two items
+      actioned immediately, the rest filed under Open below.
+      - **Dictionary lookup was O(n), on every render.** `Status.tsx` validated
+        the selected word with `allWords.indexOf(...) !== -1` over **447,880**
+        entries, and `Status` re-renders on every tile change — i.e. once per
+        tile a drag passes over. Now a module-scope `Set`. Measured against the
+        real dictionary in the running app: **313.5ms per 200 `indexOf` lookups
+        (~1.6ms each) → ~0ms** for `Set.has`, against a **one-time 40ms** build
+        at module load. The build cost pays for itself after ~25 lookups, i.e.
+        partway through the first word played, and is noise next to the 4.4MB
+        bundle parse that already happens at load. Equivalence was verified
+        rather than assumed — `Set.has` agreed with `indexOf` on 450 sampled
+        dictionary words and on non-words (`zzzz`, `qxqxqx`, `''`, `ala`):
+        0 mismatches.
+      - **Deleted dead `src/puzzle/matrix.ts`.** A superseded 2D-array iteration
+        of what is now `puzzleGeneration.ts`: 0% coverage, no importers in `src/`
+        or `scripts/`, no test file of its own, and hardcoded `WIDTH = 8` /
+        `HEIGHT = 5` matching no board the app uses. The real reason to remove it
+        rather than leave it: it exported a **second `fillMatrix`** sitting next
+        to the live one, which is precisely the encoder/decoder drift that
+        produced the base-30-vs-32 bug.
+
 ## Open
 
 ### Bugs
 
-Nothing open — the base-parsing bug and the board-size limit are both fixed
-(see Done above).
+- [ ] **The debug solution table ships to production.** `App.tsx:103-112`
+      renders a `<table>` of the board keyed `className={'t' + solution[y][x]}`
+      below the grid — a fully colour-coded answer key, confirmed live in the
+      running app at **416px tall**. **This is a deliberate debugging aid**, not
+      an accident, so the fix is to gate it (`import.meta.env.DEV`, or a query
+      flag) rather than delete it. Until then every player sees the solution.
+- [ ] **`.t1`…`.t18` are declared globally, not scoped to the grid.**
+      `Grid.scss:26-37` emits them at top level, which is *why* the debug table
+      above picks up the tile palette — it never asked for it. Worth scoping
+      under `#grid` independently of what happens to the table, so nothing else
+      inherits game colours by accident. Note `.t0` has no rule at all:
+      `solution` numbers are 0-based while tile colours are 1-based.
+- [ ] **The 18-colour word-number pool is one draw from throwing, unguarded.**
+      `NUMBER_OF_WORD_COLOURS = 18` in `puzzleGenerationAndStorage.ts:12` is
+      enforced nowhere, and `App.tsx:52` throws `'Ran out of word numbers!'` on
+      exhaustion, mid-game. Sampled **200,000 boards at 7×12**: the distribution
+      tops out at 17 (119 times) and 18 (**once**) — so it is safe today, with a
+      margin of exactly one word, protected by nothing. `generatePuzzle` already
+      does this shape of check for `MAX_WORDS`; add the same against
+      `worstCaseWordCount(width * height)` so a board-size change fails loudly at
+      generation instead of throwing during play. The constant is also coupled by
+      hand to the 18 entries in `Grid.scss` — derive one from the other, or at
+      minimum assert they agree in a test.
+- [ ] **Drag-selection is mouse-only, on a mobile-targeted app.** `Grid.tsx`
+      drives selection with `onMouseDown`/`onMouseEnter` plus a document
+      `mouseup` listener. Touch devices synthesize `mousedown`/`click` on tap but
+      **not** `mouseenter` on tiles dragged across, so sweeping out a word likely
+      degrades to one tap per tile. The manifest (`display: standalone`) and the
+      `innerHeight`-based font scaling both say phones are the primary target.
+      **Not yet confirmed on a real device** — verify before treating as a bug.
+      Usual fix is `onPointerDown`/`onPointerEnter` with `setPointerCapture`, or
+      `touchmove` + `elementFromPoint`.
 
 ### Enhancements
+
+- [ ] **Let the player request a hint.** The data is already there and already
+      persisted: `solution` is a field on `PuzzleState`, written to localStorage
+      with everything else, and the debug table above is live proof that mapping
+      solution numbers to coloured tiles renders correctly. This is mostly an
+      interaction-design question, not an algorithmic one.
+      - **Recommended shape: reveal one complete word**, by assigning it the next
+        available word number exactly as `markWord` does. That reuses the whole
+        existing path — no new tile state, no new colours, no new storage key,
+        and it survives reload for free. Picking the word means finding a
+        `solution` number whose tiles are all still `'unselected'`/`'selected'`.
+      - Alternatives considered worth weighing: revealing a single tile of an
+        unsolved word (cheaper hint, finer granularity, but needs a new tile
+        state and colour); or outlining a word's boundary without filling it in,
+        which is the *strongest* hint for a player who is stuck on where a word
+        starts rather than on what it is.
+      - **A hint consumes one of the 18 word numbers**, same as a real word, so
+        this compounds the pool-exhaustion item above — fix that guard first.
+      - Open sub-questions: is the count limited or displayed; does a hint clear
+        a partial selection or refuse while one is active; and where the control
+        lives (next to `Zaznacz słowo`, or in the menu). If hints are counted,
+        `PuzzleState` is a single persisted object, so a `hintsUsed` field costs
+        essentially nothing.
+
+- [ ] **4.4MB bundle / 1.25MB gzipped, essentially all dictionary.**
+      `src/puzzle/words.ts` is a 5MB source file exporting 447,880 entries as a
+      JS array literal, so it is parsed *as code* and every string is
+      heap-allocated at load, before the first tile renders. Two independent
+      fixes: serve the dictionary as a fetched asset (JSON or a newline blob) so
+      it is not parsed as a module and can be cached separately from app code;
+      and narrow the generation list `words` to the 4–8 letter range
+      `randomizeWord` actually draws from. The `Set` change above removed the
+      *scan* cost but not a byte of payload.
 
 - [ ] **Boards above 136 cells need a wider cell encoding.** `generatePuzzle`
       now rejects them rather than hanging, so this is a feature limit, not a
@@ -203,6 +288,49 @@ Nothing open — the base-parsing bug and the board-size limit are both fixed
       flat string and `replaceAt` assumes a single character per cell, so a
       two-character encoding is not a drop-in change. Only worth doing if a
       board larger than 136 cells is actually wanted; 7×12 is 84.
+
+### Code quality
+
+- [ ] **`matrixFunctions.ts:1` imports `TileState` from `components/App/`** —
+      the one backwards dependency arrow in an otherwise clean split, where
+      `src/puzzle/` is React-free and `src/components/` owns state. `TileState`
+      ("this cell is unselected, selected, or belongs to word *n*") is a domain
+      concept, not a UI one; moving it into `src/puzzle/` makes the boundary
+      one-directional.
+
+- [ ] **Component test coverage is inverted relative to risk.** `src/puzzle/`
+      sits at 80% while `Grid.tsx` is **38%**, `Status.tsx` **35%** and
+      `App.tsx` **53%** — the hard-to-get-wrong pure code is well covered, the
+      stateful code a player actually touches is not. Best value per line is
+      `Status`'s message/`disabled` ladder: pure logic given
+      `(matrix, tileState)`, so it needs no jsdom if extracted. After that,
+      `Grid`'s `mouseState` machine (lines 23-66, uncovered), which is where a
+      regression would reach a player. The harness already exists after
+      `App.test.tsx`, so this is writing tests, not building infrastructure.
+
+- [ ] **`fillMatrix_`'s `solutionFound` flag is a mutable early-exit bolted onto
+      a functional search** (`puzzleGeneration.ts:47`). It prunes *after*
+      recursion is entered rather than before, and the entire result list is then
+      discarded except `[0]` at line 102 — a destructure that throws a bare
+      `TypeError` if the search ever returns empty. Nothing currently proves it
+      cannot. A generator, or an explicit loop that `return`s, would say "first
+      solution wins" directly and cost less.
+
+- [ ] **`$cols: 7` in `_variables.scss` hardcodes a value `App` takes as a
+      prop** (`<App width={7} height={12}/>`). Change the prop and the grid
+      silently mis-lays out. Pass it as a CSS custom property from the component
+      instead.
+
+- [ ] **Minor, fix opportunistically rather than tracking individually:** the
+      `// naaastyyy, mutating the array` comment in `resolveMatrix.ts:11` (the
+      mutation is contained by the `words.slice()` above it, so the comment reads
+      as unfinished work rather than a real hazard); ~8 lines of commented-out
+      `console.log`/`performance.now` debug in `GeneratePuzzle.ts:16-25`, which
+      is also the only PascalCase module in a camelCase directory; `funtools.set`
+      is an immutable 2D-array update, not a set; indentation is 2-space in
+      `Status.tsx` and 4-space everywhere else, with no formatter configured to
+      settle it; and `README.md` is a single line that does not say how to run
+      the project, which is conspicuous next to `CLAUDE.md`.
 
 ### Build / tooling
 
